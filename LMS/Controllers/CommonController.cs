@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
@@ -58,8 +59,12 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetDepartments()
         {
-            // TODO: Do not return this hard-coded array.
-            return Json(new[] { new { name = "None", subject = "NONE" } });
+            // Query grabs all department names and abreviations.
+            var query =
+                from d in this.db.Departments
+                select new { name = d.DprtName, subject = d.DprtAbv};
+
+            return Json(query.ToArray());
         }
 
 
@@ -77,8 +82,16 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetCatalog()
         {
+            var query =
+                from d in this.db.Departments
+                select new { 
+                    subject = d.DprtAbv,
+                    dname = d.DprtName,
+                    courses = from c in d.Courses
+                              select new {number = c.CourseNum, cname = c.CourseName}
+                };
 
-            return Json(null);
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -97,8 +110,22 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetClassOfferings(string subject, int number)
         {
+            var query =
+                from co in this.db.Courses
+                join cl in this.db.Classes 
+                on co.CourseId equals cl.CourseId
+                where co.DprtAbv == subject && co.CourseNum == number
+                select new {
+                    season = Regex.Split(cl.Semester, " ")[0],
+                    year = UInt32.Parse(Regex.Split(cl.Semester, " ")[1]),
+                    location = cl.Location,
+                    start = cl.StartTime.HasValue ? cl.StartTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
+                    end = cl.EndTime.HasValue ? cl.EndTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
+                    fname = cl.TeacherNavigation.FName,
+                    lname = cl.TeacherNavigation.Lname
+                };
 
-            return Json(null);
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -115,6 +142,12 @@ namespace LMS.Controllers
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
         {
+            /*var query =
+                from co in this.db.Courses
+                join cl in this.db.Classes
+                on co.CourseId equals cl.CourseId
+                join ac in this.db.AssignmentCategories
+                on ac.CourseI*/
 
             return Content("");
         }
