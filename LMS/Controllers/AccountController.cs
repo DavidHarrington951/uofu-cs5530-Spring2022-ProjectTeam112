@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using LMS.Models;
 using LMS.Models.AccountViewModels;
 using LMS.Services;
+using LMS.Models.LMSModels;
 
 namespace LMS.Controllers
 {
@@ -484,6 +485,48 @@ namespace LMS.Controllers
         /// <returns>A unique uID that is not be used by anyone else</returns>
         public string CreateNewUser(string fName, string lName, DateTime DOB, string SubjectAbbrev, string role)
         {
+            if (role.Equals("Administrator"))
+            {
+                String uID = "";
+                try
+                {
+                    this.db.Administrators.Add(
+                    new Administrators { FName = fName, Lname = lName, Dob = DOB }
+                    );
+
+                    IEnumerable<UInt32> query =
+                    from a in this.db.Administrators
+                    where a.Dob.Equals(DOB) && a.FName.Equals(fName) && a.Lname.Equals(lName)
+                    select a.UId;
+
+                    uID += query.ToArray()[0].ToString();
+
+                    this.db.SaveChanges();
+                }
+                catch(Exception E)
+                {
+                    this._logger.LogError(E.Message);
+                    throw E;
+                }
+                
+
+                //todo, properly implement uID format
+                return uID;
+
+            }
+
+            else if (role.Equals("Professor"))
+            {
+                //TODO FINISH
+                this.db.Professors.Add(
+                    new Professors { }
+                    );
+            }
+
+            else if (role.Equals("Student"))
+            {
+                
+            }
             return "";
         }
 
