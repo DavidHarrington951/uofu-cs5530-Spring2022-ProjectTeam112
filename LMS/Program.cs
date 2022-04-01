@@ -11,28 +11,28 @@ using Microsoft.Extensions.Logging;
 
 namespace LMS
 {
-  public class Program
-  {
-    public static void Main(string[] args)
+    public class Program
     {
-      CreateWebHostBuilder(args).Build().Run();
+        public static void Main(string[] args)
+        {
+            CreateWebHostBuilder(args).Build().Run();
+        }
+
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
+                .ConfigureKestrel((context, options) =>
+               {
+                   options.Listen(IPAddress.Any, 80, listenOptions =>
+               {
+                     listenOptions.UseHttps("https.pfx", "pwd");
+                 });
+                   options.Listen(IPAddress.Any, 443, listenOptions =>
+               {
+                     listenOptions.UseHttps("https.pfx", "pwd");
+                 });
+               });
+
     }
-
-
-    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-        WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .ConfigureKestrel((context, options) =>
-           {
-             options.Listen(IPAddress.Any, 80, listenOptions =>
-             {
-               listenOptions.UseHttps("https.pfx", "pwd");
-             });
-             options.Listen(IPAddress.Any, 443, listenOptions =>
-             {
-               listenOptions.UseHttps("https.pfx", "pwd");
-             });
-           });
-
-  }
 }

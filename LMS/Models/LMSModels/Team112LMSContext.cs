@@ -30,8 +30,10 @@ namespace LMS.Models.LMSModels
         {
             if (!optionsBuilder.IsConfigured)
             {
+#pragma warning disable CS1030 // #warning directive
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseMySql("Server=atr.eng.utah.edu;User Id=u1255186;Password=password;Database=Team112LMS");
+#pragma warning restore CS1030 // #warning directive
             }
         }
 

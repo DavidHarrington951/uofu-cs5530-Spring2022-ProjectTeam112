@@ -19,11 +19,14 @@ namespace LMS.Controllers
 
         protected Team112LMSContext db;
 
-        public CommonController()
+        public CommonController() : this(new Team112LMSContext())
         {
-            db = new Team112LMSContext();
         }
 
+        public CommonController(Team112LMSContext Context)
+        {
+            this.db = Context;
+        }
 
         /*
          * WARNING: This is the quick and easy way to make the controller
@@ -62,7 +65,7 @@ namespace LMS.Controllers
             // Query grabs all department names and abreviations.
             var query =
                 from d in this.db.Departments
-                select new { name = d.DprtName, subject = d.DprtAbv};
+                select new { name = d.DprtName, subject = d.DprtAbv };
 
             return Json(query.ToArray());
         }
@@ -84,11 +87,12 @@ namespace LMS.Controllers
         {
             var query =
                 from d in this.db.Departments
-                select new { 
+                select new
+                {
                     subject = d.DprtAbv,
                     dname = d.DprtName,
                     courses = from c in d.Courses
-                              select new {number = c.CourseNum, cname = c.CourseName}
+                              select new { number = c.CourseNum, cname = c.CourseName }
                 };
 
             return Json(query.ToArray());
@@ -112,10 +116,11 @@ namespace LMS.Controllers
         {
             var query =
                 from co in this.db.Courses
-                join cl in this.db.Classes 
+                join cl in this.db.Classes
                 on co.CourseId equals cl.CourseId
                 where co.DprtAbv == subject && co.CourseNum == number
-                select new {
+                select new
+                {
                     season = Regex.Split(cl.Semester, " ")[0],
                     year = UInt32.Parse(Regex.Split(cl.Semester, " ")[1]),
                     location = cl.Location,
