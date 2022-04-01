@@ -83,7 +83,18 @@ namespace LMSUnitTestLibrary
             String abv = (String)type.GetProperty("subject").GetValue(x[0], null);
         }
 
+        [Fact]
+        public void TestEmptyDeptCatalog()
+        {
+            Team112LMSContext context = PopulateSingleDepartment();
+            CommonController controller = new CommonController(context);
 
+            JsonResult result = controller.GetCatalog() as JsonResult;
+            dynamic x = result.Value;
+            Type type = x[0].GetType();
+            dynamic abv = (dynamic)type.GetProperty("courses").GetValue(x[0], null);
+            Assert.Equal(0, abv.Length);
+        }
 
     }
 }
