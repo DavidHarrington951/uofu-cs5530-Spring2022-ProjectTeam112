@@ -36,7 +36,13 @@ namespace LMSTestingLibrary
         [Fact]
         public void Test2()
         {
+            Team112LMSContext smallContext = generateSmallLms();
+            CommonController controller = new CommonController(smallContext);
+            JsonResult result = controller.GetDepartments() as JsonResult;
 
+            dynamic x = result.Value;
+            int length = x.Length;
+            Assert.Equals(0, x.Length);
         }
     }
 }
