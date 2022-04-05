@@ -485,49 +485,62 @@ namespace LMS.Controllers
         /// <returns>A unique uID that is not be used by anyone else</returns>
         public string CreateNewUser(string fName, string lName, DateTime DOB, string SubjectAbbrev, string role)
         {
+            //union user tables, sort by descending, 
+
+            
+            
+
+
             if (role.Equals("Administrator"))
             {
-                String uID = "";
-                try
-                {
-                    this.db.Administrators.Add(
-                    new Administrators { FName = fName, Lname = lName, Dob = DOB }
-                    );
-
-                    IEnumerable<UInt32> query =
-                    from a in this.db.Administrators
-                    where a.Dob.Equals(DOB) && a.FName.Equals(fName) && a.Lname.Equals(lName)
-                    select a.UId;
-
-                    uID += query.ToArray()[0].ToString();
-
-                    this.db.SaveChanges();
-                }
-                catch(Exception E)
-                {
-                    this._logger.LogError(E.Message);
-                    throw E;
-                }
-                
-
-                //todo, properly implement uID format
-                return uID;
 
             }
 
             else if (role.Equals("Professor"))
             {
-                //TODO FINISH
-                this.db.Professors.Add(
-                    new Professors { }
-                    );
+
             }
 
             else if (role.Equals("Student"))
             {
-                
+
             }
             return "";
+        }
+
+        public UInt32 FetchNewUNid()
+        {
+            IQueryable<_uNID> admins =
+               from A in this.db.Administrators
+               select new _uNID { uNID = A.UId };
+
+            var professors =
+                from P in this.db.Professors
+                select new _uNID
+                {
+                    uNID = P.UId
+                };
+
+            var students =
+                from S in this.db.Students
+                select new _uNID
+                {
+                    uNID = S.UId
+                };
+
+            List<_uNID> l = admins.Union(professors).Union(students).ToList();
+            l.Sort((x, y) => x.uNID.CompareTo(y.uNID));
+            UInt32 max = l[l.Count - 1].uNID;
+
+            return max + 1;
+        }
+
+        private class _uNID
+        {
+            internal UInt32 uNID { get; set; }
+            public _uNID()
+            {
+            }
         }
 
         /*******End code to modify********/
