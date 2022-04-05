@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Microsoft.AspNetCore.Identity;
-using LMS.Models;
 
 namespace LMSUnitTestLibrary
 {
@@ -80,15 +78,23 @@ namespace LMSUnitTestLibrary
             JsonResult result = controller.GetDepartments() as JsonResult;
             dynamic x = result.Value;
             Assert.Equal(1, x.Length);
-            Assert.Equal("CS", x[0].subject);
+
+            Type type = x[0].GetType();
+            String abv = (String)type.GetProperty("subject").GetValue(x[0], null);
         }
 
         [Fact]
-        public void TestUserCreation()
+        public void TestEmptyDeptCatalog()
         {
-            Team112LMSContext context = PopulateEmptyDatabase();
-            AccountController controller = new AccountController(null, null, null, null);
-            Assert.True(controller.FetchNewUNid() == 1);
+            Team112LMSContext context = PopulateSingleDepartment();
+            CommonController controller = new CommonController(context);
+
+            JsonResult result = controller.GetCatalog() as JsonResult;
+            dynamic x = result.Value;
+            Type type = x[0].GetType();
+            dynamic abv = (dynamic)type.GetProperty("courses").GetValue(x[0], null);
+            Assert.Equal(0, abv.Length);
         }
+
     }
 }

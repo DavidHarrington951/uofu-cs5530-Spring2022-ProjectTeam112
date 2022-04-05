@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("LMSUnitTestLibrary")]
 
 namespace LMS.Controllers
 {
@@ -150,24 +147,12 @@ namespace LMS.Controllers
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
         {
-            var query =
+            /*var query =
                 from co in this.db.Courses
                 join cl in this.db.Classes
-                on new
-
-                { C = co.CourseId, S = co.DprtAbv}
-                equals new
-                { C = cl.CourseId, S = subject}
-
+                on co.CourseId equals cl.CourseId
                 join ac in this.db.AssignmentCategories
-
-                on cl.ClassId equals ac.ClassId
-                join a in this.db.Assignments
-                on ac.CattId equals a.CattId
-                select new
-                {
-
-                };
+                on ac.CourseI*/
 
             return Content("");
         }
