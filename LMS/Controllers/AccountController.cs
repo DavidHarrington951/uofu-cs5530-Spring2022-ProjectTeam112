@@ -485,49 +485,27 @@ namespace LMS.Controllers
         /// <returns>A unique uID that is not be used by anyone else</returns>
         public string CreateNewUser(string fName, string lName, DateTime DOB, string SubjectAbbrev, string role)
         {
-            if (role.Equals("Administrator"))
-            {
-                String uID = "";
-                try
-                {
-                    this.db.Administrators.Add(
-                    new Administrators { FName = fName, Lname = lName, Dob = DOB }
-                    );
+            return null;
+        }
 
-                    IEnumerable<UInt32> query =
-                    from a in this.db.Administrators
-                    where a.Dob.Equals(DOB) && a.FName.Equals(fName) && a.Lname.Equals(lName)
-                    select a.UId;
+        internal UInt32 BuildUnid()
+        {
+            IEnumerable<UInt32> AdminUNids =
+                from A in this.db.Administrators
+                select A.UId;
 
-                    uID += query.ToArray()[0].ToString();
+            IEnumerable<UInt32> ProfUNids =
+                from P in this.db.Professors
+                select P.UId;
 
-                    this.db.SaveChanges();
-                }
-                catch(Exception E)
-                {
-                    this._logger.LogError(E.Message);
-                    throw E;
-                }
-                
+            IEnumerable<UInt32> StudentUNids =
+                from S in this.db.Students
+                select S.UId;
 
-                //todo, properly implement uID format
-                return uID;
+            List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList()
+            UNids.Sort((x, y) => x.CompareTo(y)) ;
 
-            }
 
-            else if (role.Equals("Professor"))
-            {
-                //TODO FINISH
-                this.db.Professors.Add(
-                    new Professors { }
-                    );
-            }
-
-            else if (role.Equals("Student"))
-            {
-                
-            }
-            return "";
         }
 
         /*******End code to modify********/
