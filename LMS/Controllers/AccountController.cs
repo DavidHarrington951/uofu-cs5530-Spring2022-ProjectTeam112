@@ -502,9 +502,10 @@ namespace LMS.Controllers
                 from S in this.db.Students
                 select S.UId;
 
-            List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList()
-            UNids.Sort((x, y) => x.CompareTo(y)) ;
+            List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList();
+            UNids.Sort();
 
+            return UNids[UNids.Count - 1] + 1;
 
         }
 
