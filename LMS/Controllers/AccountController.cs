@@ -484,9 +484,36 @@ namespace LMS.Controllers
         /// <param name="SubjectAbbrev">The department the user belongs to (professors and students only)</param>
         /// <param name="SubjectAbbrev">The user's role: one of "Administrator", "Professor", "Student"</param> 
         /// <returns>A unique uID that is not be used by anyone else</returns>
-        public string CreateNewUser(string fName, string lName, DateTime DOB, string SubjectAbbrev, string role)
+        public String CreateNewUser(string fName, string lName, DateTime DOB, string SubjectAbbrev, string role)
         {
-            return null;
+            UInt32 uNID = this.BuildUnid();
+            String uNIDStr = this.UnidStringFormat(uNID);
+            if (role.Equals("Administrator"))
+            {
+                Administrators A = new Administrators 
+                { UId = uNID, Dob = DOB, Lname = lName, FName = fName };
+                this.db.Administrators.Add(A);
+                this.db.SaveChanges();
+                return uNIDStr;
+            }
+
+            else if (role.Equals("Professor"))
+            {
+                Professors Plum = new Professors 
+                { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
+                this.db.Professors.Add(Plum);
+                this.db.SaveChanges();
+                return uNIDStr;
+            }
+
+            else 
+            {
+                Students S = new Students
+                { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
+                this.db.Students.Add(S);
+                this.db.SaveChanges();
+                return uNIDStr;
+            }     
         }
 
         internal UInt32 BuildUnid()
@@ -509,11 +536,11 @@ namespace LMS.Controllers
             return UNids[UNids.Count - 1] + 1;
         }
 
-        internal String UnidStringFormat()
+        internal String UnidStringFormat(UInt32 uNID)
         {
             StringBuilder format = new StringBuilder("u");
-            UInt32 num = this.BuildUnid();
-            String numString = num.ToString();
+
+            String numString = uNID.ToString();
             int numZero = 7 - numString.Length;
             for(int i = 0; i < numZero; i++)
             {
