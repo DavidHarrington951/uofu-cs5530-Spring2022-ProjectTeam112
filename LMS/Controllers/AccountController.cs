@@ -15,6 +15,7 @@ using LMS.Models;
 using LMS.Models.AccountViewModels;
 using LMS.Services;
 using LMS.Models.LMSModels;
+using System.Text;
 
 namespace LMS.Controllers
 {
@@ -506,7 +507,20 @@ namespace LMS.Controllers
             UNids.Sort();
 
             return UNids[UNids.Count - 1] + 1;
+        }
 
+        internal String UnidStringFormat()
+        {
+            StringBuilder format = new StringBuilder("u");
+            UInt32 num = this.BuildUnid();
+            String numString = num.ToString();
+            int numZero = 7 - numString.Length;
+            for(int i = 0; i < numZero; i++)
+            {
+                format.Append("0");
+            }
+            format.Append(numString);
+            return format.ToString();
         }
 
         /*******End code to modify********/
