@@ -516,6 +516,11 @@ namespace LMS.Controllers
             }     
         }
 
+        /// <summary>
+        /// Searches for the highest occuring uNID among our 
+        /// Data Tables and returns the next highest number.
+        /// </summary>
+        /// <returns></returns>
         internal UInt32 BuildUnid()
         {
             IEnumerable<UInt32> AdminUNids =
@@ -536,6 +541,11 @@ namespace LMS.Controllers
             return UNids[UNids.Count - 1] + 1;
         }
 
+        /// <summary>
+        /// Converts a provided uNID from UInt32 into a string formatted as u0000000
+        /// </summary>
+        /// <param name="uNID"></param>
+        /// <returns></returns>
         internal String UnidStringFormat(UInt32 uNID)
         {
             StringBuilder format = new StringBuilder("u");
