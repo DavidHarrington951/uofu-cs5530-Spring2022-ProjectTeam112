@@ -55,6 +55,21 @@ namespace LMSUnitTestLibrary
             Assert.Equal("CS", dept.subject);
         }
 
+        [Fact]
+        public void GetDepartmentCoursesTest1()
+        {
+            Team112LMSContext Context = SingleDepartmentSingleCourse();
+            CommonController C = new CommonController(Context);
+            JsonResult result = C.GetCatalog() as JsonResult;
+            Object[] departments = (Object[])result.Value;
+            dynamic dept = departments[0];
+
+            dynamic c = dept.courses;
+            dynamic k = c[0];
+
+            Assert.Equal(1, dept.courses.Length);
+        }
+
         private static ServiceProvider NewServiceProvider()
         {
             ServiceProvider serviceProvider = new ServiceCollection()
@@ -171,6 +186,34 @@ namespace LMSUnitTestLibrary
                 Context.Departments.Add(department);
             }
             Context.SaveChanges();
+            return Context;
+        }
+
+        /// <summary>
+        /// Creates a Database Context populated with a Single Department and Single Course
+        /// </summary>
+        /// <returns>A Database Context populated with a Single Department, the CS Department.</returns>
+        public Team112LMSContext SingleDepartmentSingleCourse()
+        {
+            Team112LMSContext Context = DefaultDatabase();
+
+            Departments department = new Departments
+            {
+                DprtAbv = "CS",
+                DprtName = "Computer Science"
+            };
+            Context.Departments.Add(department);
+
+            Courses course = new Courses
+            {
+                CourseName = "Software Practice",
+                DprtAbv = "CS",
+                CourseNum = 3500
+            };
+            Context.Courses.Add(course);
+
+            Context.SaveChanges();
+
             return Context;
         }
 
