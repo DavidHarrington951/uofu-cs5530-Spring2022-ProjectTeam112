@@ -203,8 +203,69 @@ namespace LMS.Controllers
         /// The user JSON object 
         /// or an object containing {success: false} if the user doesn't exist
         /// </returns>
-        public IActionResult GetUser(string uid)
+        public IActionResult GetUser(String uid)
         {
+            //we want the numerical (integer) form of the uNID
+            UInt32 numForm = UInt32.Parse(uid.Substring(1));
+
+            //we expect a single entity to exist in one of these queries
+            //if the user doesn't exist, we return {success: false}
+            //we don't run all of these queries at once, instead we do one at a time so that
+            //we run less queries if possible
+
+            IEnumerable<Students> Student =
+                from s in this.db.Students
+                where s.UId == numForm
+                select s;
+
+            if (Student.Count() > 0)
+            {
+                Students X = Student.ElementAt(0);
+                var user = new
+                {
+                    fname = X.FName,
+                    lname = X.Lname,
+                    uid = X.UId,
+                    department = X.DprtAbv
+                };
+                return Json(user);
+            }
+
+            IEnumerable<Professors> Professor =
+                from p in this.db.Professors
+                where p.UId == numForm
+                select p;
+
+            if (Professor.Count() > 0)
+            {
+                Professors X = Professor.ElementAt(0);
+                var user = new
+                {
+                    fname = X.FName,
+                    lname = X.Lname,
+                    uid = X.UId,
+                    department = X.DprtAbv
+                };
+                return Json(user);
+            }
+
+            IEnumerable<Administrators> Admin =
+                from a in this.db.Administrators
+                where a.UId == numForm
+                select a;
+
+            if(Admin.Count() > 0)
+            {
+                Administrators X = Admin.ElementAt(0);
+                var user = new
+                {
+                    fname = X.FName,
+                    lname = X.Lname,
+                    uid = X.UId
+                };
+                return Json(user);
+            }
+
 
             return Json(new { success = false });
         }
