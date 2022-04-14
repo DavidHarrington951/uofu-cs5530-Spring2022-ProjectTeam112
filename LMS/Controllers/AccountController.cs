@@ -542,7 +542,15 @@ namespace LMS.Controllers
             List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList();
             UNids.Sort();
 
-            return UNids[UNids.Count - 1] + 1;
+            if(UNids.Count == 0)
+            {
+                return 1;
+            }
+
+            else
+            {
+                return UNids[UNids.Count - 1] + 1;
+            }
         }
 
         /// <summary>

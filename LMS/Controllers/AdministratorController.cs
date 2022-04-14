@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using LMS.Models.LMSModels;
 
 namespace LMS.Controllers
 {
@@ -40,8 +41,12 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetCourses(string subject)
         {
+            IEnumerable<Courses> CourseList =
+                from c in this.db.Courses
+                where c.DprtAbv.Equals(subject)
+                select c;
 
-            return Json(null);
+            return Json(CourseList.ToArray());
         }
 
 
@@ -59,8 +64,12 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetProfessors(string subject)
         {
+            IEnumerable<Professors> ProfessorsList =
+                from p in this.db.Professors
+                where p.DprtAbv.Equals(subject)
+                select p;
 
-            return Json(null);
+            return Json(ProfessorsList.ToArray());
         }
 
 
@@ -76,9 +85,25 @@ namespace LMS.Controllers
         /// false if the Course already exists.</returns>
         public IActionResult CreateCourse(string subject, int number, string name)
         {
+            Courses C = new Courses
+            {
+                DprtAbv = subject,
+                CourseNum = (UInt32) number,
+                CourseName = name
+            };
 
+            this.db.Courses.Add(C);
 
-            return Json(new { success = false });
+            try
+            {
+                this.db.SaveChanges();
+            }
+            catch (Exception E)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { success = true });
         }
 
 
@@ -100,6 +125,18 @@ namespace LMS.Controllers
         /// a Class offering of the same Course in the same Semester.</returns>
         public IActionResult CreateClass(string subject, int number, string season, int year, DateTime start, DateTime end, string location, string instructor)
         {
+            IEnumerable<Courses> course =
+                from c in this.db.Courses
+                where c.DprtAbv.Equals(subject) && c.CourseNum == (UInt32)number
+                select c;
+
+            UInt32 courseID = course.ElementAt(0).CourseId;
+
+            Classes C = new Classes
+            {
+                CourseId = courseID,
+
+            };
 
             return Json(new { success = false });
         }

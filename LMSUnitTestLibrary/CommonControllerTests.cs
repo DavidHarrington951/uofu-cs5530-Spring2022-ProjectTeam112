@@ -61,7 +61,8 @@ namespace LMSUnitTestLibrary
             Team112LMSContext Context = SingleDepartmentSingleCourse();
             CommonController C = new CommonController(Context);
             JsonResult result = C.GetCatalog() as JsonResult;
-            Object[] departments = (Object[])result.Value;
+            
+            Object[] departments = (Object[]) result.Value;
             dynamic dept = departments[0];
 
             dynamic c = dept.courses;
