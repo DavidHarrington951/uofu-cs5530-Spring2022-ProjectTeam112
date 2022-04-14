@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 
 namespace LMSUnitTestLibrary
 {
@@ -65,10 +66,11 @@ namespace LMSUnitTestLibrary
             Object[] departments = (Object[]) result.Value;
             dynamic dept = departments[0];
 
-            dynamic c = dept.courses;
-            dynamic k = c[0];
+            IEnumerable<Object> c = (IEnumerable<Object>)dept.courses;
 
-            Assert.Equal(1, dept.courses.Length);
+            #pragma warning disable xUnit2013 // Do not use equality check to check for collection size.
+            Assert.Equal(1, c.Count());
+            #pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
         }
 
         private static ServiceProvider NewServiceProvider()
