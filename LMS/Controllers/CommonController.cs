@@ -219,7 +219,7 @@ namespace LMS.Controllers
                 on new { G = t.AssignId, H = uNID } equals new { G = Submit.AssignId, H = Submit.UId }
                 select Submit;
 
-            return Content("");
+            return Content(Submission.ElementAt(0).Sub);
         }
 
 
