@@ -7,6 +7,7 @@ using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 [assembly: InternalsVisibleTo("LMSUnitTestLibrary")]
 
@@ -150,19 +151,28 @@ namespace LMS.Controllers
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
         {
-            var query =
-                from co in this.db.Courses
-                join cl in this.db.Classes
-                on new { c = co.CourseId, s = co.DprtAbv} 
-                equals new { c = cl.CourseId, s = subject}
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+            IQueryable<Courses> Courses =
+                from Course in this.db.Courses
+                where Course.DprtAbv == subject && Course.CourseNum == (UInt32)num
+                select Course;
 
-                join ac in this.db.AssignmentCategories
-                on cl.ClassId equals ac.ClassId
-                join a in this.db.Assignments
-                on ac.CattId equals a.CattId
-                select new { };
+            IEnumerable<Assignments> Assignments =
+                from Course in Courses
+                join Class in this.db.Classes
+                on new { A = Course.CourseId, B = Semester } equals new { A = Class.CourseId, B = Class.Semester }
+                into Joined1
+                from j in Joined1.DefaultIfEmpty()
+                join AssCatt in this.db.AssignmentCategories
+                on new { C = j.ClassId, D = category } equals new { C = AssCatt.ClassId, D = AssCatt.CattName }
+                into Joined2
+                from k in Joined2.DefaultIfEmpty()
+                join Assignment in this.db.Assignments
+                on new { E = k.CattId, F = asgname } equals new { E = Assignment.CattId, F = Assignment.AssignName }
+                select Assignment;
+                
 
-            return Content("");
+            return Content(Assignments.ElementAt(0).Contents);
         }
 
 
@@ -207,11 +217,6 @@ namespace LMS.Controllers
         {
             //we want the numerical (integer) form of the uNID
             UInt32 numForm = UInt32.Parse(uid.Substring(1));
-
-            //we expect a single entity to exist in one of these queries
-            //if the user doesn't exist, we return {success: false}
-            //we don't run all of these queries at once, instead we do one at a time so that
-            //we run less queries if possible
 
             IEnumerable<Students> Student =
                 from s in this.db.Students
@@ -265,7 +270,6 @@ namespace LMS.Controllers
                 };
                 return Json(user);
             }
-
 
             return Json(new { success = false });
         }

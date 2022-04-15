@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using LMS.Models.LMSModels;
+using System.Text;
 
 namespace LMS.Controllers
 {
@@ -48,10 +49,6 @@ namespace LMS.Controllers
 
             return Json(CourseList.ToArray());
         }
-
-
-
-
 
         /// <summary>
         /// Returns a JSON array of all the professors working in a given department.
@@ -98,7 +95,7 @@ namespace LMS.Controllers
             {
                 this.db.SaveChanges();
             }
-            catch (Exception E)
+            catch (Exception)
             {
                 return Json(new { success = false });
             }
@@ -131,11 +128,17 @@ namespace LMS.Controllers
                 select c;
 
             UInt32 courseID = course.ElementAt(0).CourseId;
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+            UInt32 profID = UInt32.Parse(instructor.Substring(1));
 
             Classes C = new Classes
             {
                 CourseId = courseID,
-
+                Semester = Semester,
+                Teacher = profID,
+                Location = location,
+                StartTime = start,
+                EndTime = end
             };
 
             return Json(new { success = false });
