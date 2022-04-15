@@ -212,7 +212,8 @@ namespace LMSUnitTestLibrary
             Enrollments Enrollment = new Enrollments
             {
                 UId = 1,
-                ClassId = 1
+                ClassId = 1,
+                Grade = "--"
             };
             Context.Enrollments.Add(Enrollment);
             Context.SaveChanges();
