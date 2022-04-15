@@ -188,6 +188,8 @@ namespace LMS.Controllers
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
         {
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
             IQueryable<Courses> Courses =
                 from Course in this.db.Courses
@@ -211,9 +213,10 @@ namespace LMS.Controllers
                 on new { E = k.CattId, F = asgname } equals new { E = Assignment.CattId, F = Assignment.AssignName }
                 into Joined3
 
-                from l in Joined3.DefaultIfEmpty()
+                from t in Joined3.DefaultIfEmpty()
+
                 join Submit in this.db.Submitted
-                on new { G = l.AssignId, H = uid } equals new { G = Submit.AssignId, H = Submit.UId }
+                on new { G = t.AssignId, H = uNID } equals new { G = Submit.AssignId, H = Submit.UId }
                 select Submit;
 
             return Content("");
