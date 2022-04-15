@@ -60,6 +60,45 @@ namespace LMSUnitTestLibrary
             Assert.Equal("CS", dept.subject);
         }
 
+        [Fact]
+        public void GetCatalog1()
+        {
+            Team112LMSContext Context = DefaultCourse(DefaultDepartment());
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
+            JsonResult result = C.GetCatalog() as JsonResult;
+            Object[] departments = (Object[])result.Value;
+
+            dynamic dept = departments[0];
+            dynamic c = dept.courses;
+
+            IEnumerable<Object> course = (IEnumerable<Object>)c;
+
+            Assert.Single(course);
+        }
+
+        [Fact]
+        public void GetClassOfferings1()
+        {
+            Team112LMSContext Context = DefaultClass(DefaultProfessor(DefaultCourse(DefaultDepartment())));
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
+            JsonResult result = C.GetClassOfferings("CS", 1410) as JsonResult;
+            Object[] classes = (Object[])result.Value;
+            Assert.Single(classes);
+        }
+
+        [Fact]
+        public void GetAssignmentContents1()
+        {
+            Team112LMSContext Context = DefaultClass(DefaultProfessor(DefaultCourse(DefaultDepartment())));
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
+            JsonResult result = C.GetAssignmentContents("CS", 1410, "Spring", 2020, "Problem Set", "PS1") as JsonResult;
+            Object[] assignments = (Object[])result.Value;
+            Assert.Single(assignments);
+        }
+
         private static ServiceProvider NewServiceProvider()
         {
             ServiceProvider serviceProvider = new ServiceCollection()
@@ -147,8 +186,8 @@ namespace LMSUnitTestLibrary
                 Semester = "Spring 2020",
                 Teacher = 1,
                 Location = "GC 1900",
-                StartTime = new DateTime(0, 0, 0, 3, 0, 0),
-                EndTime = new DateTime(0, 0, 0, 4, 20, 0)
+                StartTime = new DateTime(1, 1, 1, 3, 0, 0),
+                EndTime = new DateTime(1, 1, 1, 4, 20, 0)
             };
             Context.Classes.Add(Class);
             Context.SaveChanges();
