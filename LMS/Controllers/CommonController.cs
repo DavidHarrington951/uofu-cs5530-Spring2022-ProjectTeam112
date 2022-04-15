@@ -188,6 +188,33 @@ namespace LMS.Controllers
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
         {
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+            IQueryable<Courses> Courses =
+                from Course in this.db.Courses
+                where Course.DprtAbv == subject && Course.CourseNum == (UInt32)num
+                select Course;
+
+            IEnumerable<Submitted> Submission =
+                from Course in Courses
+
+                join Class in this.db.Classes
+                on new { A = Course.CourseId, B = Semester } equals new { A = Class.CourseId, B = Class.Semester }
+                into Joined1
+
+                from j in Joined1.DefaultIfEmpty()
+                join AssCatt in this.db.AssignmentCategories
+                on new { C = j.ClassId, D = category } equals new { C = AssCatt.ClassId, D = AssCatt.CattName }
+                into Joined2
+
+                from k in Joined2.DefaultIfEmpty()
+                join Assignment in this.db.Assignments
+                on new { E = k.CattId, F = asgname } equals new { E = Assignment.CattId, F = Assignment.AssignName }
+                into Joined3
+
+                from l in Joined3.DefaultIfEmpty()
+                join Submit in this.db.Submitted
+                on new { G = l.AssignId, H = uid } equals new { G = Submit.AssignId, H = Submit.UId }
+                select Submit;
 
             return Content("");
         }
