@@ -16,7 +16,8 @@ namespace LMSUnitTestLibrary
         public void GetDepartmentsTest0()
         {
             Team112LMSContext Context = SingleDepartment();
-            CommonController C = new CommonController(Context);
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
             Assert.True(result.Value.GetType().IsArray);
         }
@@ -25,7 +26,8 @@ namespace LMSUnitTestLibrary
         public void GetDepartmentsTest1()
         {
             Team112LMSContext Context = SingleDepartment();
-            CommonController C = new CommonController(Context);
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
             Object[] departments = (Object[])result.Value;
             Assert.Single(departments);
@@ -35,7 +37,8 @@ namespace LMSUnitTestLibrary
         public void GetDepartmentTest2()
         {
             Team112LMSContext Context = SingleDepartment();
-            CommonController C = new CommonController(Context);
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
             Object[] departments = (Object[])result.Value;
             dynamic dept = departments[0];
@@ -48,7 +51,8 @@ namespace LMSUnitTestLibrary
         public void GetDepartmentTest3()
         {
             Team112LMSContext Context = SingleDepartment();
-            CommonController C = new CommonController(Context);
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
             Object[] departments = (Object[])result.Value;
             dynamic dept = departments[0];
@@ -60,7 +64,8 @@ namespace LMSUnitTestLibrary
         public void GetDepartmentCoursesTest1()
         {
             Team112LMSContext Context = SingleCourse();
-            CommonController C = new CommonController(Context);
+            CommonController C = new CommonController();
+            C.UseLMSContext(Context);
             JsonResult result = C.GetCatalog() as JsonResult;
 
             Object[] departments = (Object[])result.Value;
@@ -68,9 +73,9 @@ namespace LMSUnitTestLibrary
 
             IEnumerable<Object> c = (IEnumerable<Object>)dept.courses;
 
-#pragma warning disable xUnit2013 // Do not use equality check to check for collection size.
+#pragma warning disable xUnit2013 
             Assert.Equal(1, c.Count());
-#pragma warning restore xUnit2013 // Do not use equality check to check for collection size.
+#pragma warning restore xUnit2013 
         }
 
         private static ServiceProvider NewServiceProvider()

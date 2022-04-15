@@ -23,13 +23,9 @@ namespace LMS.Controllers
 
         protected Team112LMSContext db;
 
-        public CommonController() : this(new Team112LMSContext())
+        public CommonController()
         {
-        }
-
-        public CommonController(Team112LMSContext Context)
-        {
-            this.db = Context;
+            this.db = new Team112LMSContext();
         }
 
         /*
