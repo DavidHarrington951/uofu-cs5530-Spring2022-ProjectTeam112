@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
@@ -106,8 +107,26 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetStudentsInClass(string subject, int num, string season, int year)
         {
+            var ClassID =
+                from co in this.db.Courses
+                join cl in this.db.Classes on co.CourseId equals cl.CourseId
+                where co.DprtAbv == subject && co.CourseNum == num
+                && Regex.Split(cl.Semester, " ")[0] == season && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
+                select cl;
 
-            return Json(null);
+            var Enrolled =
+                from c in ClassID
+                join e in this.db.Enrollments
+                on c.ClassId equals e.ClassId
+                select e;
+
+            var StudentsInClass =
+                from e in Enrolled
+                join s in this.db.Students
+                on e.UId equals s.UId
+                select new { fname = s.FName, lname = s.Lname, uid = s.UId, dob = s.Dob, grade = e.Grade };
+
+            return Json(StudentsInClass.ToArray());
         }
 
 

@@ -42,10 +42,10 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetCourses(string subject)
         {
-            IEnumerable<Courses> CourseList =
+            var CourseList =
                 from c in this.db.Courses
                 where c.DprtAbv.Equals(subject)
-                select c;
+                select new { number = c.CourseNum, name = c.CourseName };
 
             return Json(CourseList.ToArray());
         }
@@ -61,10 +61,10 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetProfessors(string subject)
         {
-            IEnumerable<Professors> ProfessorsList =
+            var ProfessorsList =
                 from p in this.db.Professors
                 where p.DprtAbv.Equals(subject)
-                select p;
+                select new { lname = p.Lname, fname = p.FName, uid = p.UId };
 
             return Json(ProfessorsList.ToArray());
         }
