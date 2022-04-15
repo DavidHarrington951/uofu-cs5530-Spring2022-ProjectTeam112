@@ -15,7 +15,7 @@ namespace LMSUnitTestLibrary
         [Fact]
         public void GetDepartmentsTest0()
         {
-            Team112LMSContext Context = SingleDepartment();
+            Team112LMSContext Context = DefaultDepartment();
             CommonController C = new CommonController();
             C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
@@ -25,7 +25,7 @@ namespace LMSUnitTestLibrary
         [Fact]
         public void GetDepartmentsTest1()
         {
-            Team112LMSContext Context = SingleDepartment();
+            Team112LMSContext Context = DefaultDepartment();
             CommonController C = new CommonController();
             C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
@@ -36,7 +36,7 @@ namespace LMSUnitTestLibrary
         [Fact]
         public void GetDepartmentTest2()
         {
-            Team112LMSContext Context = SingleDepartment();
+            Team112LMSContext Context = DefaultDepartment();
             CommonController C = new CommonController();
             C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
@@ -50,7 +50,7 @@ namespace LMSUnitTestLibrary
         [Fact]
         public void GetDepartmentTest3()
         {
-            Team112LMSContext Context = SingleDepartment();
+            Team112LMSContext Context = DefaultDepartment();
             CommonController C = new CommonController();
             C.UseLMSContext(Context);
             JsonResult result = C.GetDepartments() as JsonResult;
@@ -58,24 +58,6 @@ namespace LMSUnitTestLibrary
             dynamic dept = departments[0];
             Assert.Equal("Computer Science", dept.name);
             Assert.Equal("CS", dept.subject);
-        }
-
-        [Fact]
-        public void GetDepartmentCoursesTest1()
-        {
-            Team112LMSContext Context = SingleCourse();
-            CommonController C = new CommonController();
-            C.UseLMSContext(Context);
-            JsonResult result = C.GetCatalog() as JsonResult;
-
-            Object[] departments = (Object[])result.Value;
-            dynamic dept = departments[0];
-
-            IEnumerable<Object> c = (IEnumerable<Object>)dept.courses;
-
-#pragma warning disable xUnit2013 
-            Assert.Equal(1, c.Count());
-#pragma warning restore xUnit2013 
         }
 
         private static ServiceProvider NewServiceProvider()
@@ -103,7 +85,7 @@ namespace LMSUnitTestLibrary
         /// Creates a Database Context populated with a Single Department
         /// </summary>
         /// <returns>A Database Context populated with a Single Department, the CS Department.</returns>
-        public Team112LMSContext SingleDepartment()
+        public Team112LMSContext DefaultDepartment()
         {
             Team112LMSContext Context = DefaultDatabase();
             Context.Departments.Add(new Departments
@@ -116,296 +98,138 @@ namespace LMSUnitTestLibrary
             return Context;
         }
 
-        /// <summary>
-        /// Creates 
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext FewDepartments()
+        public Team112LMSContext DefaultCourse(Team112LMSContext Context)
         {
-            Team112LMSContext Context = DefaultDatabase();
-            Departments[] depts =
-            {
-            new Departments
-            {
-                DprtName = "Computer Science",
-                DprtAbv = "CS"
-            },
-            new Departments
-            {
-                DprtName = "History",
-                DprtAbv = "HIST"
-            },
-            new Departments
-            {
-                DprtName = "Mathematics",
-                DprtAbv = "MATH"
-            }
-            };
-
-            foreach (Departments department in depts)
-            {
-                Context.Departments.Add(department);
-            }
-
-            Context.SaveChanges();
-            return Context;
-        }
-
-        public Team112LMSContext ManyDepartments()
-        {
-            Team112LMSContext Context = DefaultDatabase();
-            Departments[] depts =
-            {
-
-            new Departments
-            {
-                DprtName = "Computer Science",
-                DprtAbv = "CS"
-            },
-            new Departments
-            {
-                DprtName = "History",
-                DprtAbv = "HIST"
-            },
-            new Departments
-            {
-                DprtName = "Mathematics",
-                DprtAbv = "MATH"
-            },
-            new Departments
-            {
-                DprtName = "Writing",
-                DprtAbv = "WRTG"
-            },
-            new Departments
-            {
-                DprtName = "Biology",
-                DprtAbv = "BIOL"
-            },
-            new Departments
-            {
-                DprtName = "Economics",
-                DprtAbv = "ECON"
-            },
-            new Departments
-            {
-                DprtName = "Physics",
-                DprtAbv = "PHYS"
-            }
-            };
-
-            foreach (Departments department in depts)
-            {
-                Context.Departments.Add(department);
-            }
-            Context.SaveChanges();
-            return Context;
-        }
-
-        /// <summary>
-        /// Builds a Context with a single course mapped to a single department
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext SingleCourse()
-        {
-            Team112LMSContext Context = SingleDepartment();
-            Context.Courses.Add(new Courses
+            Courses Course = new Courses
             {
                 DprtAbv = "CS",
                 CourseNum = 1410,
                 CourseName = "Intro to Obj Oriented Programming"
-            }
-            );
+            };
+            Context.Courses.Add(Course);
             Context.SaveChanges();
-
             return Context;
         }
 
-        /// <summary>
-        /// Builds a Context with a few Courses mapped to a single department
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext FewCourses()
+        public Team112LMSContext DefaultProfessor(Team112LMSContext Context)
         {
-            Team112LMSContext Context = SingleDepartment();
-            Courses[] Courses =
+            Professors Professor = new Professors
             {
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 1410,
-                    CourseName = "Intro to Obj Oriented Programming"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 2420,
-                    CourseName = "Intro to Algorithms and Data Structures"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 3500,
-                    CourseName = "Software Practice I"
-                }
-            };
-            foreach(Courses Course in Courses)
-            {
-                Context.Courses.Add(Course);
-            }
-
-            return Context;
-        }
-
-        /// <summary>
-        /// Builds a Context with many Courses mapped to a single department
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext ManyCourses()
-        {
-            Team112LMSContext Context = SingleDepartment();
-            Courses[] Courses =
-            {
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 1410,
-                    CourseName = "Intro to Obj Oriented Programming"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 2100,
-                    CourseName = "Discrete Structures"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 2420,
-                    CourseName = "Intro to Algorithms and Data Structures"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 3500,
-                    CourseName = "Software Practice I"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 3505,
-                    CourseName = "Software Practice II"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 3810,
-                    CourseName = "Computer Architecture"
-                },
-                new Courses
-                {
-                    DprtAbv = "CS",
-                    CourseNum = 4150,
-                    CourseName = "Algorithms"
-                }
-            };
-            foreach (Courses Course in Courses)
-            {
-                Context.Courses.Add(Course);
-            }
-
-            return Context;
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext SingleUser()
-        {
-            Team112LMSContext Context = SingleDepartment();
-            Context.Professors.Add(new Professors
-            {
+                DprtAbv = "CS",
                 FName = "Daniel",
                 Lname = "Kopta",
-                DprtAbv = "CS",
-                UId = 297211,
                 Dob = new DateTime()
-            }
-            );
+            };
+            Context.Professors.Add(Professor);
             Context.SaveChanges();
             return Context;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext FewUsers()
+        public Team112LMSContext DefaultStudent(Team112LMSContext Context)
         {
-            Team112LMSContext Context = SingleDepartment();
-            Context.Professors.Add(new Professors
+            Students Student = new Students
             {
-                FName = "Daniel",
-                Lname = "Kopta",
                 DprtAbv = "CS",
-                UId = 297211,
+                FName = "David",
+                Lname = "Harrington",
                 Dob = new DateTime()
-            }
-            );
+            };
+            Context.Students.Add(Student);
+            Context.SaveChanges();
+            return Context;
+        }
 
-            Students[] Students =
+        public Team112LMSContext DefaultClass(Team112LMSContext Context)
+        {
+            Classes Class = new Classes
             {
-                new Students
+                CourseId = 1,
+                Semester = "Spring 2020",
+                Teacher = 1,
+                Location = "GC 1900",
+                StartTime = new DateTime(0, 0, 0, 3, 0, 0),
+                EndTime = new DateTime(0, 0, 0, 4, 20, 0)
+            };
+            Context.Classes.Add(Class);
+            Context.SaveChanges();
+            return Context;
+        }
+
+        public Team112LMSContext DefaultCattegories(Team112LMSContext Context)
+        {
+            AssignmentCategories[] Categories =
+            {
+                new AssignmentCategories
                 {
-                    FName = "David",
-                    Lname = "Harrington",
-                    DprtAbv = "CS",
-                    UId = 1184803,
-                    Dob = new DateTime()
+                    ClassId = 1,
+                    CattName = "Exam",
+                    GradeWeight = 40
                 },
-                new Students
+                new AssignmentCategories
                 {
-                    FName = "Ethan",
-                    Lname = "Quinlan",
-                    DprtAbv = "CS",
-                    UId = 1255186,
-                    Dob = new DateTime()
+                    ClassId = 1,
+                    CattName = "Quiz",
+                    GradeWeight = 15
+                },
+                new AssignmentCategories
+                {
+                    ClassId = 1,
+                    CattName = "Participation",
+                    GradeWeight = 5
+                },
+                new AssignmentCategories
+                {
+                    ClassId = 1,
+                    CattName = "Problem Set",
+                    GradeWeight = 40
                 }
             };
 
-            foreach(Students student in Students)
+            foreach(AssignmentCategories Category in Categories)
             {
-                Context.Students.Add(student);
+                Context.Add(Category);
             }
             Context.SaveChanges();
             return Context;
         }
 
-        /// <summary>
-        /// Multiple users to multiple departments
-        /// </summary>
-        /// <param name="Context"></param>
-        /// <returns></returns>
-        public Team112LMSContext FewUsers(Team112LMSContext Context)
+        public Team112LMSContext DefaultAssignment(Team112LMSContext Context)
         {
-            throw new NotImplementedException("Operation Not Implemented");
+            Assignments Assignment = new Assignments
+            {
+                CattId = 4,
+                AssignName = "PS1",
+                MaxPoints = 100,
+                Contents = "Step 1: Profit"
+            };
+            Context.Assignments.Add(Assignment);
+            Context.SaveChanges();
+            return Context;
         }
 
-        /// <summary>
-        /// Many users to a single department
-        /// </summary>
-        /// <returns></returns>
-        public Team112LMSContext ManyUsers()
+        public Team112LMSContext DefaultEnrollment(Team112LMSContext Context)
         {
-            throw new NotImplementedException("Operation Not Implemented");
+            Enrollments Enrollment = new Enrollments
+            {
+                UId = 1,
+                ClassId = 1
+            };
+            Context.Enrollments.Add(Enrollment);
+            Context.SaveChanges();
+            return Context;
         }
 
-        public Team112LMSContext ManyUsers(Team112LMSContext Context)
+        public Team112LMSContext DefaultSubmission(Team112LMSContext Context)
         {
-            throw new NotImplementedException("Operation Not Implemented");
+            Submitted Submission = new Submitted
+            {
+                UId = 1,
+                AssignId = 1,
+                Sub = "Profit",
+            };
+            Context.Submitted.Add(Submission);
+            Context.SaveChanges();
+            return Context;
         }
-
     }
 }
