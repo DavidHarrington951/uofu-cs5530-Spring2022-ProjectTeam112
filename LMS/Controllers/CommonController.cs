@@ -256,7 +256,7 @@ namespace LMS.Controllers
                 {
                     fname = X.FName,
                     lname = X.Lname,
-                    uid = X.UId,
+                    uid = UnidStringFormat(X.UId),
                     department = X.DprtAbv
                 };
                 return Json(user);
@@ -274,7 +274,7 @@ namespace LMS.Controllers
                 {
                     fname = X.FName,
                     lname = X.Lname,
-                    uid = X.UId,
+                    uid = UnidStringFormat(X.UId),
                     department = X.DprtAbv
                 };
                 return Json(user);
@@ -292,7 +292,7 @@ namespace LMS.Controllers
                 {
                     fname = X.FName,
                     lname = X.Lname,
-                    uid = X.UId
+                    uid = UnidStringFormat(X.UId)
                 };
                 return Json(user);
             }
@@ -300,6 +300,24 @@ namespace LMS.Controllers
             return Json(new { success = false });
         }
 
+        /// <summary>
+        /// Converts a provided uNID from UInt32 into a string formatted as u0000000
+        /// </summary>
+        /// <param name="uNID"></param>
+        /// <returns></returns>
+        internal String UnidStringFormat(UInt32 uNID)
+        {
+            StringBuilder format = new StringBuilder("u");
+
+            String numString = uNID.ToString();
+            int numZero = 7 - numString.Length;
+            for (int i = 0; i < numZero; i++)
+            {
+                format.Append("0");
+            }
+            format.Append(numString);
+            return format.ToString();
+        }
 
         /*******End code to modify********/
 
