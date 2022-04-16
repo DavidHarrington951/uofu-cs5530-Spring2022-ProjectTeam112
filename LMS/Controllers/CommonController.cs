@@ -51,9 +51,6 @@ namespace LMS.Controllers
             base.Dispose(disposing);
         }
 
-
-
-
         /// <summary>
         /// Retreive a JSON array of all departments from the database.
         /// Each object in the array should have a field called "name" and "subject",
