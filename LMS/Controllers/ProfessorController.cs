@@ -124,7 +124,7 @@ namespace LMS.Controllers
                 from e in Enrolled
                 join s in this.db.Students
                 on e.UId equals s.UId
-                select new { fname = s.FName, lname = s.Lname, uid = s.UId, dob = s.Dob, grade = e.Grade };
+                select new { fname = s.FName, lname = s.Lname, uid = UnidStringFormat(s.UId), dob = s.Dob, grade = e.Grade };
 
             return Json(StudentsInClass.ToArray());
         }

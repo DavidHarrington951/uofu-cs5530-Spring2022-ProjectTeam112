@@ -64,7 +64,7 @@ namespace LMS.Controllers
             var ProfessorsList =
                 from p in this.db.Professors
                 where p.DprtAbv.Equals(subject)
-                select new { lname = p.Lname, fname = p.FName, uid = p.UId };
+                select new { lname = p.Lname, fname = p.FName, uid = UnidStringFormat(p.UId) };
 
             return Json(ProfessorsList.ToArray());
         }
