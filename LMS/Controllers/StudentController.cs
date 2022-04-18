@@ -268,23 +268,20 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-
-            //Rewrite with complex filters
-            IEnumerable<UInt32> Class =
-
-                // join Courses with Classes on the filter CourseID
+            IEnumerable<UInt32> Classes =
+                //get the Course that matches the filter
                 from Course in this.db.Courses
-                join Offering in this.db.Classes
-                on Course.CourseId equals Offering.CourseId
-                into Joined1
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
 
-                // select the element where 
-                from element1 in Joined1
-                where Course.DprtAbv == subject && Course.CourseNum == num && element1.Semester.Equals(Semester)
-                select element1.ClassId;
+                //join Courses with Classes on the Filter CourseID and Semester = value
+                join Class in this.db.Classes
+                on new { ID = Course.CourseId, F = Semester } equals new { ID = Class.CourseId, F = Class.Semester }
+
+                //select the classID of that class. 
+                select Class.ClassId;
 
             // Retrieve the single value from the IEnumerable
-            UInt32 cID = Class.ElementAt(0);
+            UInt32 cID = Classes.ElementAt(0);
 
             // Construct our Enrollment
             Enrollments Enrollment = new Enrollments
@@ -329,13 +326,19 @@ namespace LMS.Controllers
             // Perform Parameter Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
+            //Get the list of grades of the student
             IEnumerable<String> Grades =
+                // for each Enrollment in Enrollments where the uID matches our filter and the Grade exists
                 from Enrollment in this.db.Enrollments
                 where Enrollment.UId == uNID && !Enrollment.Grade.Equals("--")
+
+                //select it. 
                 select Enrollment.Grade;
 
+            //Convert the list to a gradepoint average. 
             Double GPA = ConvertGPA(Grades);
 
+            //return our Gradepoint average
             return Json(new { gpa = GPA });
         }
 
@@ -346,11 +349,15 @@ namespace LMS.Controllers
         /// <returns></returns>
         public Double ConvertGPA(IEnumerable<String> GradeList)
         {
+            //if the provided list of grades is empty,
+            // return 0 as we cannot divide by zero
             if (GradeList.Count() == 0)
             {
                 return 0.0;
             }
 
+            //foreach Grade in our list of grades, convert
+            // it to the appropriate decimal value and add them together
             Double Sum = 0.0;
             foreach (String Grade in GradeList)
             {
@@ -404,8 +411,8 @@ namespace LMS.Controllers
                 }
             }
 
+            //take and return our average. 
             Double GPA = Sum / GradeList.Count();
-
             return GPA;
         }
 
