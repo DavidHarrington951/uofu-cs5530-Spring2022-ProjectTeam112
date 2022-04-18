@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -67,8 +70,27 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+            IEnumerable<Object> query =
+                from Enrollment in this.db.Enrollments
+                where Enrollment.UId == uNID
+                join Class in this.db.Classes
+                on Enrollment.ClassId equals Class.ClassId
+                into Joined1
+                from element1 in Joined1
+                join Course in this.db.Courses
+                on element1.CourseId equals Course.CourseId
+                select new
+                {
+                    subject = Course.DprtAbv,
+                    number = Course.CourseNum,
+                    name = Course.CourseName,
+                    season = Regex.Split(element1.Semester, " ")[0],
+                    year = Regex.Split(element1.Semester, " ")[1],
+                    grade = Enrollment.Grade
 
-            return Json(null);
+                };
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -87,8 +109,24 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
         {
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            return Json(null);
+            IEnumerable<Object> query =
+                from Course in this.db.Courses
+                join Class in this.db.Classes
+                on Course.CourseId equals Class.CourseId
+                into Joined1
+                from element1 in Joined1
+                join Enrollment in this.db.Enrollments
+                on element1.ClassId equals Enrollment.ClassId
+                where Enrollment.UId == uNID && Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num && element1.Semester.Equals(Semester)
+                select new
+                {
+
+                };
+
+            return Json(query.ToArray());
         }
 
 
@@ -150,8 +188,86 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing a single field called "gpa" with the number value</returns>
         public IActionResult GetGPA(string uid)
         {
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
-            return Json(null);
+            IEnumerable<String> Grades =
+                from Enrollment in this.db.Enrollments
+                where Enrollment.UId == uNID && !Enrollment.Grade.Equals("--")
+                select Enrollment.Grade;
+
+            Double GPA = ConvertGPA(Grades);
+
+            return Json(new { gpa = GPA });
+        }
+
+        /// <summary>
+        /// Converts list of a student's Grades to a Grade Point Average
+        /// </summary>
+        /// <param name="GradeList"></param>
+        /// <returns></returns>
+        public Double ConvertGPA(IEnumerable<String> GradeList)
+        {
+            if(GradeList.Count() == 0)
+            {
+                return 0.0;
+            }
+
+            Double Sum = 0.0;
+            foreach(String Grade in GradeList)
+            {
+                if (Grade.Equals("A"))
+                {
+                    Sum += 4.0;
+                }
+                else if (Grade.Equals("A-"))
+                {
+                    Sum += 3.7;
+                }
+                else if (Grade.Equals("B+"))
+                {
+                    Sum += 3.3;
+                }
+                else if (Grade.Equals("B"))
+                {
+                    Sum += 3.0;
+                }
+                else if (Grade.Equals("B-"))
+                {
+                    Sum += 2.7;
+                }
+                else if (Grade.Equals("C+"))
+                {
+                    Sum += 2.3;
+                }
+                else if (Grade.Equals("C"))
+                {
+                    Sum += 2.0;
+                }
+                else if (Grade.Equals("C-"))
+                {
+                    Sum += 1.7;
+                }
+                else if (Grade.Equals("D+"))
+                {
+                    Sum += 1.3;
+                }
+                else if (Grade.Equals("D"))
+                {
+                    Sum += 1.0;
+                }
+                else if (Grade.Equals("D-"))
+                {
+                    Sum += .7;
+                }
+                else if (Grade.Equals("E"))
+                {
+                    Sum += 0.0;
+                }
+            }
+
+            Double GPA = Sum / GradeList.Count();
+
+            return GPA;
         }
 
         /*******End code to modify********/

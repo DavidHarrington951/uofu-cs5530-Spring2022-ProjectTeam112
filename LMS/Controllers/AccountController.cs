@@ -34,10 +34,10 @@ namespace LMS.Controllers
             IEmailSender emailSender,
             ILogger<AccountController> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            //_emailSender = emailSender;
-            _logger = logger;
+            this._userManager = userManager;
+            this._signInManager = signInManager;
+            //this._emailSender = emailSender;
+            this._logger = logger;
         }
 
 
@@ -494,7 +494,6 @@ namespace LMS.Controllers
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName };
                 this.db.Administrators.Add(A);
                 this.db.SaveChanges();
-                this._logger.LogInformation("Added Administrator");
                 return uNIDStr;
             }
 
@@ -504,7 +503,6 @@ namespace LMS.Controllers
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
                 this.db.Professors.Add(Plum);
                 this.db.SaveChanges();
-                this._logger.LogInformation("Added Professor");
                 return uNIDStr;
             }
 
@@ -514,7 +512,6 @@ namespace LMS.Controllers
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
                 this.db.Students.Add(S);
                 this.db.SaveChanges();
-                this._logger.LogInformation("Added Student");
                 return uNIDStr;
             }     
         }
@@ -538,7 +535,6 @@ namespace LMS.Controllers
                 from S in this.db.Students
                 select S.UId;
 
-            this._logger.LogTrace("Queried uNIDs from Database");
             List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList();
             UNids.Sort();
 

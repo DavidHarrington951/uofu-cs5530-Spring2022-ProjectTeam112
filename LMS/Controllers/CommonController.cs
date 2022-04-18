@@ -111,7 +111,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetClassOfferings(string subject, int number)
         {
-            var query =
+            var Offerings =
                 from co in this.db.Courses
                 join cl in this.db.Classes
                 on co.CourseId equals cl.CourseId
@@ -127,7 +127,7 @@ namespace LMS.Controllers
                     lname = cl.TeacherNavigation.Lname
                 };
 
-            return Json(query.ToArray());
+            return Json(Offerings.ToArray());
         }
 
         /// <summary>
@@ -144,26 +144,30 @@ namespace LMS.Controllers
         /// <returns>The assignment contents</returns>
         public IActionResult GetAssignmentContents(string subject, int num, string season, int year, string category, string asgname)
         {
+            //Perform Variable Type Conversion
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
-            IQueryable<Courses> Courses =
-                from Course in this.db.Courses
-                where Course.DprtAbv == subject && Course.CourseNum == (UInt32)num
-                select Course;
 
             IEnumerable<Assignments> Assignments =
-                from Course in Courses
-                join Class in this.db.Classes
-                on new { A = Course.CourseId, B = Semester } equals new { A = Class.CourseId, B = Class.Semester }
-                into Joined1
-                from j in Joined1.DefaultIfEmpty()
-                join AssCatt in this.db.AssignmentCategories
-                on new { C = j.ClassId, D = category } equals new { C = AssCatt.ClassId, D = AssCatt.CattName }
-                into Joined2
-                from k in Joined2.DefaultIfEmpty()
+                //select the course where it's dprt and coursenum meet requirements
+                from Course in this.db.Courses
+                where Course.DprtAbv == subject && Course.CourseNum == (UInt32)num
+
+                //join classes on courseId and Semester
+                join offering in this.db.Classes
+                on new { A = Course.CourseId, B = Semester } equals new { A = offering.CourseId, B = offering.Semester }
+                into Join1
+
+                //join categories on classID and category name
+                from element1 in Join1
+                join Cattegory in this.db.AssignmentCategories
+                on new { A = element1.ClassId, B = category } equals new { A = Cattegory.ClassId, B = Cattegory.CattName }
+                into Join2
+
+                //join assignments on catID and assignment name
+                from element2 in Join2
                 join Assignment in this.db.Assignments
-                on new { E = k.CattId, F = asgname } equals new { E = Assignment.CattId, F = Assignment.AssignName }
+                on new { A = element2.CattId, B = asgname } equals new { A = Assignment.CattId, B = Assignment.AssignName }
                 select Assignment;
-                
 
             return Content(Assignments.ElementAt(0).Contents);
         }
@@ -185,38 +189,52 @@ namespace LMS.Controllers
         /// <returns>The submission text</returns>
         public IActionResult GetSubmissionText(string subject, int num, string season, int year, string category, string asgname, string uid)
         {
+            //Perform Variable Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
-
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
-            IQueryable<Courses> Courses =
+
+            //query for the submission
+            IEnumerable<Submitted> Submissions =
+                //select the course where it's dprt and coursenum meet requirements
                 from Course in this.db.Courses
                 where Course.DprtAbv == subject && Course.CourseNum == (UInt32)num
-                select Course;
+                
+                //join classes on courseId and Semester
+                join offering in this.db.Classes
+                on new { A = Course.CourseId, B = Semester } equals new { A = offering.CourseId, B = offering.Semester }
+                into Join1
 
-            IEnumerable<Submitted> Submission =
-                from Course in Courses
+                //join categories on classID and category name
+                from element1 in Join1
+                join Category in this.db.AssignmentCategories
+                on new { A = element1.ClassId, B = category } equals new { A = Category.ClassId, B = Category.CattName }
+                into Join2
 
-                join Class in this.db.Classes
-                on new { A = Course.CourseId, B = Semester } equals new { A = Class.CourseId, B = Class.Semester }
-                into Joined1
-
-                from j in Joined1.DefaultIfEmpty()
-                join AssCatt in this.db.AssignmentCategories
-                on new { C = j.ClassId, D = category } equals new { C = AssCatt.ClassId, D = AssCatt.CattName }
-                into Joined2
-
-                from k in Joined2.DefaultIfEmpty()
+                //join assignments on catID and assignment name
+                from element2 in Join2
                 join Assignment in this.db.Assignments
-                on new { E = k.CattId, F = asgname } equals new { E = Assignment.CattId, F = Assignment.AssignName }
-                into Joined3
+                on new { A = element2.CattId, B = asgname } equals new { A = Assignment.CattId, B = Assignment.AssignName }
+                into Join3
 
-                from t in Joined3.DefaultIfEmpty()
+                //join submissions on assignmentID and uNID
+                from element3 in Join3
+                join Submission in this.db.Submitted
+                on new { A = element3.AssignId, B = uNID } equals new { A = Submission.AssignId, B = Submission.UId }
+                select Submission;
 
-                join Submit in this.db.Submitted
-                on new { G = t.AssignId, H = uNID } equals new { G = Submit.AssignId, H = Submit.UId }
-                select Submit;
 
-            return Content(Submission.ElementAt(0).Sub);
+            //if the query returned a value
+            if(Submissions.Count() > 0)
+            {
+                //return that value
+                return Content(Submissions.ElementAt(0).Sub);
+            }
+
+            //else return an empty string
+            else
+            {
+                return Content("");
+            }
         }
 
 
@@ -241,6 +259,8 @@ namespace LMS.Controllers
             //we want the numerical (integer) form of the uNID
             UInt32 numForm = UInt32.Parse(uid.Substring(1));
 
+            //query each user table, one after the other until we get what we want, then
+            // we return
             IEnumerable<Students> Student =
                 from s in this.db.Students
                 where s.UId == numForm
@@ -282,7 +302,7 @@ namespace LMS.Controllers
                 where a.UId == numForm
                 select a;
 
-            if(Admin.Count() > 0)
+            if (Admin.Count() > 0)
             {
                 Administrators X = Admin.ElementAt(0);
                 var user = new

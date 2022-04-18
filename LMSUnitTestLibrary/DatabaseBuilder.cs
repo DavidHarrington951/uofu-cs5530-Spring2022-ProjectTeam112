@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace LMSUnitTestLibrary
 {
@@ -92,7 +93,7 @@ namespace LMSUnitTestLibrary
             Context.Classes.Add(new Classes
             {
                 CourseId = 1,
-                Semester = "Spring 2020",
+                Semester = "Spring 2022",
                 Teacher = 1,
                 Location = "GC 1900",
                 StartTime = new DateTime(1, 1, 1, 3, 0, 0),
@@ -207,7 +208,7 @@ namespace LMSUnitTestLibrary
         /// Populates the Test DB with more Courses for the CS Department
         /// </summary>
         /// <returns></returns>
-        public static Team112LMSContext SingleManyClasses()
+        public static Team112LMSContext SingleManyCourses()
         {
             Team112LMSContext Context = DefaultDatabase();
 
@@ -243,6 +244,55 @@ namespace LMSUnitTestLibrary
         }
 
         /// <summary>
+        /// Populates the Test DB with more Classes for CS 1410 for the CS Department
+        /// </summary>
+        /// <returns></returns>
+        public static Team112LMSContext SingleManyClasses()
+        {
+            Team112LMSContext Context = DefaultDatabase();
+
+            Classes[] offerings =
+            {
+                new Classes
+                {
+                    CourseId = 1,
+                    Semester = "Spring 2021",
+                    Teacher = 1,
+                    Location = "GC 1900",
+                    StartTime = new DateTime(1, 1, 1, 3, 0, 0),
+                    EndTime = new DateTime(1, 1, 1, 4, 20, 0)
+                },
+                new Classes
+                {
+                    CourseId = 1,
+                    Semester = "Spring 2020",
+                    Teacher = 1,
+                    Location = "GC 1900",
+                    StartTime = new DateTime(1, 1, 1, 3, 0, 0),
+                    EndTime = new DateTime(1, 1, 1, 4, 20, 0)
+                },
+                new Classes
+                {
+                    CourseId = 1,
+                    Semester = "Spring 2019",
+                    Teacher = 1,
+                    Location = "GC 1900",
+                    StartTime = new DateTime(1, 1, 1, 3, 0, 0),
+                    EndTime = new DateTime(1, 1, 1, 4, 20, 0)
+                }
+            };
+
+            foreach (Classes offering in offerings)
+            {
+                Context.Classes.Add(offering);
+            }
+
+            Context.SaveChanges();
+
+            return Context;
+        }
+
+        /// <summary>
         /// Creates a CommonController Based on the Default Database
         /// </summary>
         /// <returns></returns>
@@ -256,6 +306,13 @@ namespace LMSUnitTestLibrary
             CommonController Controller = new CommonController();
             Controller.UseLMSContext(Context);
             return Controller;
+        }
+
+        public static AccountController DefaultAccountController()
+        {
+            AccountController Controller = new AccountController(null, null, null, null);
+
+            throw new NotImplementedException();
         }
 
 
