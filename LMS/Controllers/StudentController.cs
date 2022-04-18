@@ -70,19 +70,27 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {
-            // Perform Variable Type Conversion
+            // Perform Parameter Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
+            //Get the list of classes that this student is enrolled in, with the requested data
+            // as an IEnumerable of objects (Anonymous Type)
             IEnumerable<Object> Classes =
+                // Get the Enrollment that Matches the Filter of uID
                 from Enrollment in this.db.Enrollments
                 where Enrollment.UId == uNID
+
+                // Join Enrollments with Classes on the Filter ClassID
                 join Class in this.db.Classes
                 on Enrollment.ClassId equals Class.ClassId
                 into Joined1
 
+                // Join Classes with Courses on the Filter CourseID
                 from element1 in Joined1
                 join Course in this.db.Courses
                 on element1.CourseId equals Course.CourseId
+
+                //From that Joined Table, Select the data we want.
                 select new
                 {
                     subject = Course.DprtAbv,
@@ -93,6 +101,8 @@ namespace LMS.Controllers
                     grade = Enrollment.Grade
 
                 };
+
+            //Convert the IEnumerable to an Array and Return it. 
             return Json(Classes.ToArray());
         }
 
@@ -112,9 +122,11 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInClass(string subject, int num, string season, int year, string uid)
         {
+            //Perform Parameter Variable and Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
+            //Get an IQueryable of ClassIDs, join 
             IQueryable<UInt32> ClassIDs =
                 from Course in this.db.Courses
                 where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
@@ -180,8 +192,63 @@ namespace LMS.Controllers
         public IActionResult SubmitAssignmentText(string subject, int num, string season, int year,
           string category, string asgname, string uid, string contents)
         {
+            //Perform Parameter Variable and Type conversion
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            return Json(new { success = false });
+            //Get the list of Assignment ID's that match our filters
+            IEnumerable<UInt32> AssignmentIDs =
+                // get the course that matches filter
+                from Course in this.db.Courses
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
+
+                // join with Classes on the Filter of CourseID and Semester = value
+                join Offering in this.db.Classes
+                on new { ID = Course.CourseId, F = Semester } equals new { ID = Offering.CourseId, F = Offering.Semester }
+                into Joined1
+
+                // join with AssignmentCategories on the Filter of ClassID and CattName = value
+                from element1 in Joined1
+                join Category in this.db.AssignmentCategories
+                on new { ID = element1.ClassId, F = category } equals new { ID = Category.ClassId, F = Category.CattName }
+                into Joined2
+
+                // join with Assignments on the Filter CattID and AssignName = value
+                from element2 in Joined2
+                join Assignment in this.db.Assignments
+                on new { ID = element2.CattId, F = asgname } equals new { ID = Assignment.CattId, F = Assignment.AssignName }
+
+                //select the assignmentID
+                select Assignment.AssignId;
+
+            // The IEnumerable should only have a single element inside it, that element is our AssignID
+            UInt32 AssignID = AssignmentIDs.ElementAt(0);
+
+            // Construct our Assignment Submission
+            Submitted Submission = new Submitted
+            {
+                UId = uNID,
+                AssignId = AssignID,
+                Sub = contents,
+                Score = 0,
+                SubTime = System.DateTime.Now
+            };
+
+            // Try and add this submission to the Database
+            try
+            {
+                this.db.Submitted.Add(Submission);
+                this.db.SaveChanges();
+            }
+
+            // if the assignment already exists, return false, for the assignment has already been added 
+            catch
+            {
+                return Json(new { success = false });
+            }
+
+            // else return true, the operation was a success
+            return Json(new { success = true });
         }
 
 
@@ -197,37 +264,50 @@ namespace LMS.Controllers
         /// false if the student is already enrolled in the Class.</returns>
         public IActionResult Enroll(string subject, int num, string season, int year, string uid)
         {
-            // Perform Variable Type Conversion
+            // Perform Parameter Variable and Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
+
+            //Rewrite with complex filters
             IEnumerable<UInt32> Class =
+
+                // join Courses with Classes on the filter CourseID
                 from Course in this.db.Courses
                 join Offering in this.db.Classes
                 on Course.CourseId equals Offering.CourseId
-                into Joined
+                into Joined1
 
-                from element in Joined
-                where Course.DprtAbv == subject && Course.CourseNum == num && element.Semester.Equals(Semester)
-                select element.ClassId;
+                // select the element where 
+                from element1 in Joined1
+                where Course.DprtAbv == subject && Course.CourseNum == num && element1.Semester.Equals(Semester)
+                select element1.ClassId;
 
+            // Retrieve the single value from the IEnumerable
             UInt32 cID = Class.ElementAt(0);
 
+            // Construct our Enrollment
+            Enrollments Enrollment = new Enrollments
+            {
+                ClassId = cID,
+                UId = uNID,
+                Grade = "--"
+            };
+
+            //Try and Add our Enrollment to the Database
             try
             {
-                this.db.Enrollments.Add(new Enrollments
-                {
-                    ClassId = cID,
-                    UId = uNID,
-                    Grade = "--"
-                });
+                this.db.Enrollments.Add(Enrollment);
                 this.db.SaveChanges();
             }
+
+            // if the Enrollment Already exists in the db, return false
             catch (Exception)
             {
                 return Json(new { success = false });
             }
 
+            // else return true, operation successful
             return Json(new { success = true });
         }
 
@@ -246,6 +326,7 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing a single field called "gpa" with the number value</returns>
         public IActionResult GetGPA(string uid)
         {
+            // Perform Parameter Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
             IEnumerable<String> Grades =
@@ -265,13 +346,13 @@ namespace LMS.Controllers
         /// <returns></returns>
         public Double ConvertGPA(IEnumerable<String> GradeList)
         {
-            if(GradeList.Count() == 0)
+            if (GradeList.Count() == 0)
             {
                 return 0.0;
             }
 
             Double Sum = 0.0;
-            foreach(String Grade in GradeList)
+            foreach (String Grade in GradeList)
             {
                 if (Grade.Equals("A"))
                 {
