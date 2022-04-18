@@ -70,13 +70,16 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {
+            // Perform Variable Type Conversion
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
-            IEnumerable<Object> query =
+
+            IEnumerable<Object> Classes =
                 from Enrollment in this.db.Enrollments
                 where Enrollment.UId == uNID
                 join Class in this.db.Classes
                 on Enrollment.ClassId equals Class.ClassId
                 into Joined1
+
                 from element1 in Joined1
                 join Course in this.db.Courses
                 on element1.CourseId equals Course.CourseId
@@ -90,7 +93,7 @@ namespace LMS.Controllers
                     grade = Enrollment.Grade
 
                 };
-            return Json(query.ToArray());
+            return Json(Classes.ToArray());
         }
 
         /// <summary>
@@ -112,21 +115,46 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            IEnumerable<Object> query =
+            IQueryable<UInt32> ClassIDs =
                 from Course in this.db.Courses
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
                 join Class in this.db.Classes
-                on Course.CourseId equals Class.CourseId
+                on new { Id = Course.CourseId, F = Semester } equals new { Id = Class.CourseId, F = Class.Semester }
                 into Joined1
+
                 from element1 in Joined1
                 join Enrollment in this.db.Enrollments
-                on element1.ClassId equals Enrollment.ClassId
-                where Enrollment.UId == uNID && Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num && element1.Semester.Equals(Semester)
+                on new { ID = element1.ClassId, F = uNID } equals new { ID = Enrollment.ClassId, F = Enrollment.UId }
+                into Joined2
+                from element2 in Joined2
+                select element2.ClassId;
+
+            IEnumerable<Object> Assignments =
+                from C in ClassIDs
+                join Category in this.db.AssignmentCategories
+                on C equals Category.ClassId
+                into Joined1
+
+                from element1 in Joined1
+                join Assignment in this.db.Assignments
+                on element1.CattId equals Assignment.CattId
+                into Joined2
+
+                from element2 in Joined2
+                join Submission in this.db.Submitted
+                on element2.AssignId equals Submission.AssignId
+                into Joined3
+
+                from element3 in Joined3
                 select new
                 {
-
+                    aname = element2.AssignName,
+                    cname = element1.CattName,
+                    due = element2.DueDate.HasValue ? element2.DueDate.ToString() : "",
+                    score = element3.Sub == null ? element3.Sub : null
                 };
 
-            return Json(query.ToArray());
+            return Json(Assignments.ToArray());
         }
 
 
@@ -169,8 +197,38 @@ namespace LMS.Controllers
         /// false if the student is already enrolled in the Class.</returns>
         public IActionResult Enroll(string subject, int num, string season, int year, string uid)
         {
+            // Perform Variable Type Conversion
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            return Json(new { success = false });
+            IEnumerable<UInt32> Class =
+                from Course in this.db.Courses
+                join Offering in this.db.Classes
+                on Course.CourseId equals Offering.CourseId
+                into Joined
+
+                from element in Joined
+                where Course.DprtAbv == subject && Course.CourseNum == num && element.Semester.Equals(Semester)
+                select element.ClassId;
+
+            UInt32 cID = Class.ElementAt(0);
+
+            try
+            {
+                this.db.Enrollments.Add(new Enrollments
+                {
+                    ClassId = cID,
+                    UId = uNID,
+                    Grade = "--"
+                });
+                this.db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { success = true });
         }
 
 
