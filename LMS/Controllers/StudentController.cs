@@ -126,47 +126,9 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            //Get an IQueryable of ClassIDs, join 
-            IQueryable<UInt32> ClassIDs =
-                from Course in this.db.Courses
-                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
-                join Class in this.db.Classes
-                on new { Id = Course.CourseId, F = Semester } equals new { Id = Class.CourseId, F = Class.Semester }
-                into Joined1
+            
 
-                from element1 in Joined1
-                join Enrollment in this.db.Enrollments
-                on new { ID = element1.ClassId, F = uNID } equals new { ID = Enrollment.ClassId, F = Enrollment.UId }
-                into Joined2
-                from element2 in Joined2
-                select element2.ClassId;
-
-            IEnumerable<Object> Assignments =
-                from C in ClassIDs
-                join Category in this.db.AssignmentCategories
-                on C equals Category.ClassId
-                into Joined1
-
-                from element1 in Joined1
-                join Assignment in this.db.Assignments
-                on element1.CattId equals Assignment.CattId
-                into Joined2
-
-                from element2 in Joined2
-                join Submission in this.db.Submitted
-                on element2.AssignId equals Submission.AssignId
-                into Joined3
-
-                from element3 in Joined3
-                select new
-                {
-                    aname = element2.AssignName,
-                    cname = element1.CattName,
-                    due = element2.DueDate.HasValue ? element2.DueDate.ToString() : "",
-                    score = element3.Sub == null ? element3.Sub : null
-                };
-
-            return Json(Assignments.ToArray());
+            return Json("");
         }
 
 

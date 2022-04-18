@@ -13,16 +13,19 @@ using System.Text;
 
 namespace LMS.Controllers
 {
+    //Author: Prof Daniel Kopta
+    // Modified by: David Harrington and Ethan Quinlan
+    /// <summary>
+    /// Inherits from Controller, a base Controller class for all other Controllers to Inherit from. 
+    /// Contains basic Query Functionality. 
+    /// </summary>
     public class CommonController : Controller
     {
-
-        /*******Begin code to modify********/
-
-        // TODO: Uncomment and change 'X' after you have scaffoled
-
-
         protected Team112LMSContext db;
 
+        /// <summary>
+        /// Default Constructor, initializes class with Database Context
+        /// </summary>
         public CommonController()
         {
             this.db = new Team112LMSContext();
@@ -35,8 +38,10 @@ namespace LMS.Controllers
          *          (look this up if interested).
         */
 
-        // TODO: Uncomment and change 'X' after you have scaffoled
-
+        /// <summary>
+        /// Set the Database Context to the Context we wish to use. 
+        /// </summary>
+        /// <param name="ctx"></param>
         public void UseLMSContext(Team112LMSContext ctx)
         {
             db = ctx;
@@ -59,11 +64,13 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetDepartments()
         {
-            // Query grabs all department names and abreviations.
-            var query =
-                from d in this.db.Departments
-                select new { name = d.DprtName, subject = d.DprtAbv };
+            //Get the List of all Departments in our Database
+            IEnumerable<Object> query =
+                //foreach Department in our Database
+                from Department in this.db.Departments
+                select new { name = Department.DprtName, subject = Department.DprtAbv };
 
+            //Convert to an array and return
             return Json(query.ToArray());
         }
 
@@ -82,16 +89,21 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetCatalog()
         {
-            var query =
-                from d in this.db.Departments
+            //Get the List of Courses Associated with each Department in our Database
+            IEnumerable<Object> query =
+                //foreach Department in our Database
+                from Department in this.db.Departments
+
+                //Get requested data from it 
                 select new
                 {
-                    subject = d.DprtAbv,
-                    dname = d.DprtName,
-                    courses = from c in d.Courses
+                    subject = Department.DprtAbv,
+                    dname = Department.DprtName,
+                    courses = from c in Department.Courses
                               select new { number = c.CourseNum, cname = c.CourseName }
                 };
 
+            //Convert to an Array and return
             return Json(query.ToArray());
         }
 
@@ -111,22 +123,27 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetClassOfferings(string subject, int number)
         {
-            var Offerings =
-                from co in this.db.Courses
-                join cl in this.db.Classes
-                on co.CourseId equals cl.CourseId
-                where co.DprtAbv == subject && co.CourseNum == number
+            //Get the List of Course Offerings that Match our Filter
+            IEnumerable<Object> Offerings =
+                // join Courses and Classes on CourseID
+                from Course in this.db.Courses
+                join Class in this.db.Classes
+                on Course.CourseId equals Class.CourseId
+
+                // select where DprtAbv = value and 
+                where Course.DprtAbv == subject && Course.CourseNum == (UInt32)number
                 select new
                 {
-                    season = Regex.Split(cl.Semester, " ")[0],
-                    year = UInt32.Parse(Regex.Split(cl.Semester, " ")[1]),
-                    location = cl.Location,
-                    start = cl.StartTime.HasValue ? cl.StartTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
-                    end = cl.EndTime.HasValue ? cl.EndTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
-                    fname = cl.TeacherNavigation.FName,
-                    lname = cl.TeacherNavigation.Lname
+                    season = Regex.Split(Class.Semester, " ")[0],
+                    year = UInt32.Parse(Regex.Split(Class.Semester, " ")[1]),
+                    location = Class.Location,
+                    start = Class.StartTime.HasValue ? Class.StartTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
+                    end = Class.EndTime.HasValue ? Class.EndTime.Value.ToString("hh:mm:ss") : "No Meeting Time",
+                    fname = Class.TeacherNavigation.FName,
+                    lname = Class.TeacherNavigation.Lname
                 };
 
+            //Convert the IEnumerable to an Array
             return Json(Offerings.ToArray());
         }
 
@@ -254,21 +271,23 @@ namespace LMS.Controllers
         /// The user JSON object 
         /// or an object containing {success: false} if the user doesn't exist
         /// </returns>
-        public IActionResult GetUser(String uid)
+        public IActionResult GetUser(string uid)
         {
-            //we want the numerical (integer) form of the uNID
-            UInt32 numForm = UInt32.Parse(uid.Substring(1));
+            //Perform Parameter Type Conversion
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
             //query each user table, one after the other until we get what we want, then
             // we return
-            IEnumerable<Students> Student =
-                from s in this.db.Students
-                where s.UId == numForm
-                select s;
 
-            if (Student.Count() > 0)
+            //Foreach Student, select if they equal our uNID
+            IEnumerable<Students> Students =
+                from Student in this.db.Students
+                where Student.UId == uNID
+                select Student;
+
+            if (Students.Count() > 0)
             {
-                Students X = Student.ElementAt(0);
+                Students X = Students.ElementAt(0);
                 var user = new
                 {
                     fname = X.FName,
@@ -279,14 +298,15 @@ namespace LMS.Controllers
                 return Json(user);
             }
 
-            IEnumerable<Professors> Professor =
-                from p in this.db.Professors
-                where p.UId == numForm
-                select p;
+            //Foreach Professor, select if they equal our uNID
+            IEnumerable<Professors> Professors =
+                from Professor in this.db.Professors
+                where Professor.UId == uNID
+                select Professor;
 
-            if (Professor.Count() > 0)
+            if (Professors.Count() > 0)
             {
-                Professors X = Professor.ElementAt(0);
+                Professors X = Professors.ElementAt(0);
                 var user = new
                 {
                     fname = X.FName,
@@ -297,14 +317,15 @@ namespace LMS.Controllers
                 return Json(user);
             }
 
-            IEnumerable<Administrators> Admin =
-                from a in this.db.Administrators
-                where a.UId == numForm
-                select a;
+            //Foreach Admin, select if they equal our uNID
+            IEnumerable<Administrators> Admins =
+                from Admin in this.db.Administrators
+                where Admin.UId == uNID
+                select Admin;
 
-            if (Admin.Count() > 0)
+            if (Admins.Count() > 0)
             {
-                Administrators X = Admin.ElementAt(0);
+                Administrators X = Admins.ElementAt(0);
                 var user = new
                 {
                     fname = X.FName,
@@ -314,6 +335,8 @@ namespace LMS.Controllers
                 return Json(user);
             }
 
+            //After we have gone through each user table
+            // if the user doesn't exist, return false.
             return Json(new { success = false });
         }
 
@@ -335,8 +358,5 @@ namespace LMS.Controllers
             format.Append(numString);
             return format.ToString();
         }
-
-        /*******End code to modify********/
-
     }
 }
