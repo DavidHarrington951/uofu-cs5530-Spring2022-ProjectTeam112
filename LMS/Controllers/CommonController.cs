@@ -31,13 +31,7 @@ namespace LMS.Controllers
             this.db = new Team112LMSContext();
         }
 
-        /*
-         * WARNING: This is the quick and easy way to make the controller
-         *          use a different LibraryContext - good enough for our purposes.
-         *          The "right" way is through Dependency Injection via the constructor 
-         *          (look this up if interested).
-        */
-
+        //TODO: learn how to use Dependency Injection
         /// <summary>
         /// Set the Database Context to the Context we wish to use. 
         /// </summary>
@@ -73,8 +67,6 @@ namespace LMS.Controllers
             //Convert to an array and return
             return Json(query.ToArray());
         }
-
-
 
         /// <summary>
         /// Returns a JSON array representing the course catalog.
@@ -189,7 +181,6 @@ namespace LMS.Controllers
             return Content(Assignments.ElementAt(0).Contents);
         }
 
-
         /// <summary>
         /// This method does NOT return JSON. It returns plain text (containing html).
         /// Use "return Content(...)" to return plain text.
@@ -239,7 +230,6 @@ namespace LMS.Controllers
                 on new { A = element3.AssignId, B = uNID } equals new { A = Submission.AssignId, B = Submission.UId }
                 select Submission;
 
-
             //if the query returned a value
             if(Submissions.Count() > 0)
             {
@@ -253,7 +243,6 @@ namespace LMS.Controllers
                 return Content("");
             }
         }
-
 
         /// <summary>
         /// Gets information about a user as a single JSON object.

@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LMS.Controllers
 {
+    //Author: Prof Daniel Kopta
+    // Modified by: David Harrington and Ethan Quinlan
     [Authorize(Roles = "Professor")]
     public class ProfessorController : CommonController
     {
@@ -89,7 +91,6 @@ namespace LMS.Controllers
         }
 
         /*******Begin code to modify********/
-
 
         /// <summary>
         /// Returns a JSON array of all the students in a class.
@@ -265,12 +266,29 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetMyClasses(string uid)
         {
+            // Perform Parameter Type Conversion
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
 
-            return Json(null);
+            // Get the list of the Professor's Classes
+            IEnumerable<Object> Classes =
+                //join Courses with Classes on the Filter CourseID and uNID == Teacher
+                from Course in this.db.Courses
+                join Class in this.db.Classes
+                on new { ID = Course.CourseId, F = uNID } equals new { ID = Class.CourseId, F = Class.Teacher }
+
+                //select our values from our table row
+                select new
+                {
+                    subject = Course.DprtAbv,
+                    number = Course.CourseNum,
+                    name = Course.CourseName,
+                    season = Regex.Split(Class.Semester, " ")[0],
+                    year = Regex.Split(Class.Semester, " ")[1],
+                };
+
+
+
+            return Json(Classes.ToArray());
         }
-
-
-        /*******End code to modify********/
-
     }
 }

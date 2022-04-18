@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LMS.Controllers
 {
+    //Author: Prof Daniel Kopta
+    // Modified by: David Harrington and Ethan Quinlan
     [Authorize(Roles = "Student")]
     public class StudentController : CommonController
     {
@@ -126,7 +128,7 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            
+            //TODO: Implement
 
             return Json("");
         }
