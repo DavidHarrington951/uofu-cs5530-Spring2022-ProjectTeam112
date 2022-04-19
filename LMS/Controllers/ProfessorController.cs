@@ -151,8 +151,23 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInCategory(string subject, int num, string season, int year, string category)
         {
+            //TODO fix number of submissions
 
-            return Json(null);
+            var query =
+                from co in this.db.Courses
+                join cl in this.db.Classes
+                on co.CourseId equals cl.CourseId
+                where co.DprtAbv == subject && co.CourseNum == num
+                join ac in this.db.AssignmentCategories
+                on cl.ClassId equals ac.ClassId
+                where Regex.Split(cl.Semester, " ")[0] == season
+                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
+                && ac.CattName == category
+                join asg in this.db.Assignments
+                on ac.CattId equals asg.CattId
+                select new { aname = asg.AssignName, cName = ac.CattName, due = asg.DueDate, submissions = 1};
+
+            return Json(query.ToArray());
         }
 
 
@@ -170,8 +185,18 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentCategories(string subject, int num, string season, int year)
         {
+            var query =
+                from co in this.db.Courses
+                join cl in this.db.Classes
+                on co.CourseId equals cl.CourseId
+                where co.DprtAbv == subject && co.CourseNum == num
+                join ac in this.db.AssignmentCategories
+                on cl.ClassId equals ac.ClassId
+                where Regex.Split(cl.Semester, " ")[0] == season
+                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
+                select new { name = ac.CattName, weight = ac.GradeWeight };
 
-            return Json(null);
+            return Json(query.ToArray());
         }
 
         /// <summary>
@@ -187,8 +212,42 @@ namespace LMS.Controllers
         ///	false if an assignment category with the same name already exists in the same class.</returns>
         public IActionResult CreateAssignmentCategory(string subject, int num, string season, int year, string category, int catweight)
         {
+            IEnumerable<Courses> Courses =
+                from c in this.db.Courses
+                where c.DprtAbv.Equals(subject) && c.CourseNum == (UInt32)num
+                select c;
 
-            return Json(new { success = false });
+            UInt32 courseID = Courses.ElementAt(0).CourseId;
+
+            IEnumerable<Classes> Classes =
+                from cl in this.db.Classes
+                where cl.CourseId == courseID
+                && Regex.Split(cl.Semester, " ")[0] == season 
+                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
+                select cl;
+
+            UInt32 classID = Classes.ElementAt(0).ClassId;
+
+            AssignmentCategories ac = new AssignmentCategories
+            {
+                CattName = category,
+                ClassId = classID,
+                GradeWeight = (UInt32) catweight
+                
+            };
+
+            //Try and insert our class, if the class exists we return false
+            try
+            {
+                this.db.AssignmentCategories.Add(ac);
+                this.db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { success = true });
         }
 
         /// <summary>
@@ -207,8 +266,42 @@ namespace LMS.Controllers
         /// false if an assignment with the same name already exists in the same assignment category.</returns>
         public IActionResult CreateAssignment(string subject, int num, string season, int year, string category, string asgname, int asgpoints, DateTime asgdue, string asgcontents)
         {
+            IEnumerable<AssignmentCategories> query =
+                from co in this.db.Courses
+                join cl in this.db.Classes
+                on co.CourseId equals cl.CourseId
+                where co.DprtAbv == subject && co.CourseNum == num
+                join ac in this.db.AssignmentCategories
+                on cl.ClassId equals ac.ClassId
+                where Regex.Split(cl.Semester, " ")[0] == season
+                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
+                && ac.CattName == category
+                select ac;
 
-            return Json(new { success = false });
+            UInt32 cattID = query.ElementAt(0).CattId;
+
+            Assignments Assign = new Assignments
+            {
+                AssignName = asgname,
+                CattId = cattID,
+                DueDate = asgdue,
+                MaxPoints = (UInt32) asgpoints,
+                Contents = asgcontents,
+
+            };
+
+            //Try and insert our class, if the class exists we return false
+            try
+            {
+                this.db.Assignments.Add(Assign);
+                this.db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { success = true });
         }
 
 
