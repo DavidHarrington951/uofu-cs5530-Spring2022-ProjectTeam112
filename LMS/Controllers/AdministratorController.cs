@@ -42,7 +42,7 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetCourses(string subject)
         {
-            var CourseList =
+            IEnumerable<Object> CourseList =
                 from c in this.db.Courses
                 where c.DprtAbv.Equals(subject)
                 select new { number = c.CourseNum, name = c.CourseName };
@@ -61,7 +61,7 @@ namespace LMS.Controllers
         /// <returns>The JSON result</returns>
         public IActionResult GetProfessors(string subject)
         {
-            var ProfessorsList =
+            IEnumerable<Object> ProfessorsList =
                 from p in this.db.Professors
                 where p.DprtAbv.Equals(subject)
                 select new { lname = p.Lname, fname = p.FName, uid = UnidStringFormat(p.UId) };
@@ -122,16 +122,20 @@ namespace LMS.Controllers
         /// a Class offering of the same Course in the same Semester.</returns>
         public IActionResult CreateClass(string subject, int number, string season, int year, DateTime start, DateTime end, string location, string instructor)
         {
-            IEnumerable<Courses> course =
+            //TODO add Time Checking
+
+            //Get the List of Courses that match the description
+            IEnumerable<Courses> Courses =
                 from c in this.db.Courses
                 where c.DprtAbv.Equals(subject) && c.CourseNum == (UInt32)number
                 select c;
 
-            UInt32 courseID = course.ElementAt(0).CourseId;
+            //Get the remaining data we need to create our new course
+            UInt32 courseID = Courses.ElementAt(0).CourseId;
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
             UInt32 profID = UInt32.Parse(instructor.Substring(1));
 
-            Classes C = new Classes
+            Classes Class = new Classes
             {
                 CourseId = courseID,
                 Semester = Semester,
@@ -141,7 +145,18 @@ namespace LMS.Controllers
                 EndTime = end
             };
 
-            return Json(new { success = false });
+            //Try and insert our class, if the class exists we return false
+            try
+            {
+                this.db.Classes.Add(Class);
+                this.db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { success = true });
         }
 
 

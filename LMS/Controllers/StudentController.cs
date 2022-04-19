@@ -55,9 +55,6 @@ namespace LMS.Controllers
             return View();
         }
 
-
-        /*******Begin code to modify********/
-
         /// <summary>
         /// Returns a JSON array of the classes the given student is enrolled in.
         /// Each object in the array should have the following fields:
@@ -379,8 +376,5 @@ namespace LMS.Controllers
             Double GPA = Sum / GradeList.Count();
             return GPA;
         }
-
-        /*******End code to modify********/
-
     }
 }

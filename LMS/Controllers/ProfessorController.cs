@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LMS.Models.LMSModels;
@@ -230,9 +231,46 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetSubmissionsToAssignment(string subject, int num, string season, int year, string category, string asgname)
         {
-            return Json(new { success = false });
-        }
+            //Perform Parameter Variable Conversion
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
+            IEnumerable<Object> Submissions =
+                from Course in this.db.Courses
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
+                join Class in this.db.Classes
+                on new { ID = Course.CourseId, F = Semester } equals new { ID = Class.CourseId, F = Class.Semester }
+                into Joined1
+
+                from element1 in Joined1
+                join Category in this.db.AssignmentCategories
+                on new { ID = element1.ClassId, F = category } equals new { ID = Category.ClassId, F = Category.CattName }
+                into Joined2
+
+                from element2 in Joined2
+                join Assignment in this.db.Assignments
+                on new { ID = element2.CattId, F = asgname } equals new { ID = Assignment.CattId, F = Assignment.AssignName }
+                into Joined3
+
+                from element3 in Joined3
+                join Submission in this.db.Submitted
+                on element3.AssignId equals Submission.AssignId
+                into Joined4
+
+                from element4 in Joined4
+                join Student in this.db.Students
+                on element4.UId equals Student.UId
+                select new
+                {
+                    fname = Student.FName,
+                    lname = Student.Lname,
+                    uid = Student.UId,
+                    time = element4.SubTime.HasValue ? element4.SubTime.Value.ToString() : "Not Submitted",
+                    score = element4.Score.HasValue ? element4.Score : 0
+                };
+
+
+            return Json(Submissions.ToArray());
+        }
 
         /// <summary>
         /// Set the score of an assignment submission
@@ -248,6 +286,58 @@ namespace LMS.Controllers
         /// <returns>A JSON object containing success = true/false</returns>
         public IActionResult GradeSubmission(string subject, int num, string season, int year, string category, string asgname, string uid, int score)
         {
+            //Perform Parameter Variable and Type Conversion
+            UInt32 uNID = UInt32.Parse(uid.Substring(1));
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+
+            var Submissions =
+                from Course in this.db.Courses
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
+                join Class in this.db.Classes
+                on new { ID = Course.CourseId, F = Semester } equals new { ID = Class.CourseId, F = Class.Semester }
+                into Joined1
+
+                from element1 in Joined1
+                join Category in this.db.AssignmentCategories
+                on new { ID = element1.ClassId, F = category } equals new { ID = Category.ClassId, F = Category.CattName }
+                into Joined2
+
+                from element2 in Joined2
+                join Assignment in this.db.Assignments
+                on new { ID = element2.CattId, F = asgname } equals new { ID = Assignment.CattId, F = Assignment.AssignName }
+                into Joined3
+
+                from element3 in Joined3
+                join Sub in this.db.Submitted
+                on new { ID = element3.AssignId, F = uNID } equals new { ID = Sub.AssignId, F = Sub.UId }
+                select new
+                {
+                    sub = Sub,
+                    cID = element1.ClassId
+                };
+
+
+            UInt32 cID = 0;
+            //update the submission with our new score
+            foreach(var v in Submissions)
+            {
+                v.sub.Score = (UInt32)score;
+                cID = v.cID;
+            }
+            
+            //update the grade in the class
+
+            //Try submitting changes to the database
+            try
+            {
+                this.db.SaveChanges();
+            }
+
+            //if the changes fail, return false
+            catch (Exception)
+            {
+                return Json(new { success = false });
+            }
 
             return Json(new { success = true });
         }
@@ -286,8 +376,7 @@ namespace LMS.Controllers
                     year = Regex.Split(Class.Semester, " ")[1],
                 };
 
-
-
+            //Convert to an array and return as JsonResult
             return Json(Classes.ToArray());
         }
     }

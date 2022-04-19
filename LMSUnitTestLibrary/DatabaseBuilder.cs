@@ -234,7 +234,7 @@ namespace LMSUnitTestLibrary
                 }
             };
 
-            foreach(Courses Course in Courses)
+            foreach (Courses Course in Courses)
             {
                 Context.Courses.Add(Course);
             }
