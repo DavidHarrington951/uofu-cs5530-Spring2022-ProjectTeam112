@@ -151,23 +151,77 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInCategory(string subject, int num, string season, int year, string category)
         {
-            //TODO fix number of submissions
+            if(category == null)
+            {
+                String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+                IEnumerable<Object> x
+                    = from course in this.db.Courses
+                      where course.DprtAbv.Equals(subject) && course.CourseNum == num
+                      join Class in this.db.Classes
+                      on course.CourseId equals Class.CourseId
+                      into Joined1
 
-            var query =
-                from co in this.db.Courses
-                join cl in this.db.Classes
-                on co.CourseId equals cl.CourseId
-                where co.DprtAbv == subject && co.CourseNum == num
-                join ac in this.db.AssignmentCategories
-                on cl.ClassId equals ac.ClassId
-                where Regex.Split(cl.Semester, " ")[0] == season
-                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
-                && ac.CattName == category
-                join asg in this.db.Assignments
-                on ac.CattId equals asg.CattId
-                select new { aname = asg.AssignName, cName = ac.CattName, due = asg.DueDate, submissions = 1};
+                      from element1 in Joined1
+                      where element1.Semester.Equals(Semester)
+                      join AssignmentCategory in this.db.AssignmentCategories
+                      on element1.ClassId equals AssignmentCategory.ClassId
+                      into Joined2
 
-            return Json(query.ToArray());
+                      from element2 in Joined2
+                      join Assignment in this.db.Assignments
+                      on element2.CattId equals Assignment.CattId
+                      into Joined3
+
+                      from element3 in Joined3
+                      select new
+                      {
+                          aname = element3.AssignName,
+                          cname = element2.CattName,
+                          due = element3.DueDate,
+                          submissions = ((IEnumerable<Object>)(
+                          from submission in this.db.Submitted
+                          where submission.AssignId == element3.AssignId
+                          select submission)).Count()
+                      };
+
+                return Json(x.ToArray());
+            }
+            else
+            {
+                String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+                IEnumerable<Object> x
+                    = from course in this.db.Courses
+                      where course.DprtAbv.Equals(subject) && course.CourseNum == num
+                      join Class in this.db.Classes
+                      on course.CourseId equals Class.CourseId
+                      into Joined1
+
+                      from element1 in Joined1
+                      where element1.Semester.Equals(Semester)
+                      join AssignmentCategory in this.db.AssignmentCategories
+                      on element1.ClassId equals AssignmentCategory.ClassId
+                      into Joined2
+
+                      from element2 in Joined2
+                      where element2.CattName.Equals(category)
+                      join Assignment in this.db.Assignments
+                      on element2.CattId equals Assignment.CattId
+                      into Joined3
+
+                      from element3 in Joined3
+                      select new
+                      {
+                          aname = element3.AssignName,
+                          cname = element2.CattName,
+                          due = element3.DueDate,
+                          submissions = ((IEnumerable<Object>)(
+                          from submission in this.db.Submitted
+                          where submission.AssignId == element3.AssignId
+                          select submission)).Count()
+                      };
+
+                return Json(x.ToArray());
+            }
         }
 
 
@@ -222,7 +276,7 @@ namespace LMS.Controllers
             IEnumerable<Classes> Classes =
                 from cl in this.db.Classes
                 where cl.CourseId == courseID
-                && Regex.Split(cl.Semester, " ")[0] == season 
+                && Regex.Split(cl.Semester, " ")[0] == season
                 && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
                 select cl;
 
@@ -232,8 +286,8 @@ namespace LMS.Controllers
             {
                 CattName = category,
                 ClassId = classID,
-                GradeWeight = (UInt32) catweight
-                
+                GradeWeight = (UInt32)catweight
+
             };
 
             //Try and insert our class, if the class exists we return false
@@ -285,7 +339,7 @@ namespace LMS.Controllers
                 AssignName = asgname,
                 CattId = cattID,
                 DueDate = asgdue,
-                MaxPoints = (UInt32) asgpoints,
+                MaxPoints = (UInt32)asgpoints,
                 Contents = asgcontents,
 
             };
@@ -412,12 +466,12 @@ namespace LMS.Controllers
 
             UInt32 cID = 0;
             //update the submission with our new score
-            foreach(var v in Submissions)
+            foreach (var v in Submissions)
             {
                 v.sub.Score = (UInt32)score;
                 cID = v.cID;
             }
-            
+
             //update the grade in the class
 
             //Try submitting changes to the database
