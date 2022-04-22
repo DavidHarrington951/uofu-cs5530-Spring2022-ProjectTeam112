@@ -415,7 +415,6 @@ namespace LMS.Controllers
                     score = element4.Score
                 };
 
-
             return Json(Submissions.ToArray());
         }
 
@@ -463,14 +462,11 @@ namespace LMS.Controllers
                     cID = element1.ClassId
                 };
 
+            
 
-            UInt32 cID = 0;
-            //update the submission with our new score
-            foreach (var v in Submissions)
-            {
-                v.sub.Score = (UInt32)score;
-                cID = v.cID;
-            }
+            Submissions.ElementAt(0).sub.Score = (UInt32)score;
+
+            UInt32 cID = Submissions.ElementAt(0).cID;
 
             //update the grade in the class
 
@@ -488,6 +484,15 @@ namespace LMS.Controllers
 
             return Json(new { success = true });
         }
+
+        public void UpdateGrade(UInt32 uID, UInt32 cID)
+        {
+            IEnumerable<Enrollments> Enrollment =
+                from Enroll in this.db.Enrollments
+                where Enroll.ClassId == cID && Enroll.UId == uID
+                select Enroll;
+        }
+
 
 
         /// <summary>
