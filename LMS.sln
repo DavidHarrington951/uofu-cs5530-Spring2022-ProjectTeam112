@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LMS", "LMS\LMS.csproj", "{0938F8A8-3504-4270-AD0D-3155FE513CEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMSUnitTestLibrary", "LMSUnitTestLibrary\LMSUnitTestLibrary.csproj", "{CD749546-AC6B-4F5E-9880-832FDA23B917}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LMSUnitTestLibrary", "LMSUnitTestLibrary\LMSUnitTestLibrary.csproj", "{CD749546-AC6B-4F5E-9880-832FDA23B917}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E4D4FEF1-8CD5-4C6A-AAA1-4DBF48E8C16A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

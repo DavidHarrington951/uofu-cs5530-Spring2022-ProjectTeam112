@@ -24,4 +24,9 @@
     <Folder Include="Models\LMSModels\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

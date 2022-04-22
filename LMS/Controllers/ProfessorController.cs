@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -487,10 +488,63 @@ namespace LMS.Controllers
 
         public void UpdateGrade(UInt32 uID, UInt32 cID)
         {
-            IEnumerable<Enrollments> Enrollment =
+
+
+            IEnumerable<AssignmentCategories> Categories =
+                from Category in this.db.AssignmentCategories
+                where Category.ClassId == cID
+                select Category;
+
+            Double total = 0;
+            UInt32 WeightTotal = 0;
+
+            foreach(AssignmentCategories Category in Categories)
+            {
+                UInt32 id = Category.CattId;
+
+                IEnumerable<Assignments> Assignments =
+                    from Assignment in this.db.Assignments
+                    where Assignment.CattId == id
+                    select Assignment;
+
+                if(Assignments.Count() > 0)
+                {
+                    UInt32 weight = Category.GradeWeight;
+
+                    WeightTotal += weight;
+
+                    Double ScoreTotal = 0;
+                    // divide by
+                    Double AssignmentTotal = 0;
+
+                    foreach (Assignments Assignment in Assignments)
+                    {
+                        Submitted Submission = this.db.Submitted.Find(uID, Assignment.AssignId);
+
+                        AssignmentTotal += Assignment.MaxPoints;
+                        ScoreTotal += Submission.Score;
+                    }
+
+                    Double percentage = ScoreTotal / AssignmentTotal;
+
+                    Double Scale = percentage * WeightTotal;
+
+                    total += Scale;
+                }
+            }
+
+            Double factor = 100 / WeightTotal;
+
+
+
+
+            //step n
+            IEnumerable < Enrollments > Enrollment =
                 from Enroll in this.db.Enrollments
                 where Enroll.ClassId == cID && Enroll.UId == uID
                 select Enroll;
+
+            
         }
 
 
