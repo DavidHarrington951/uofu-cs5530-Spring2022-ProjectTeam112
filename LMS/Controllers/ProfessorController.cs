@@ -564,43 +564,43 @@ namespace LMS.Controllers
             {
                 return "A";
             }
-            else if (Percentage < 93 && Percentage > 90)
+            else if (Percentage < 93 && Percentage >= 90)
             {
                 return "A-";
             }
-            else if (Percentage < 90 && Percentage > 87)
+            else if (Percentage < 90 && Percentage >= 87)
             {
                 return "B+";
             }
-            else if (Percentage < 87 && Percentage > 83)
+            else if (Percentage < 87 && Percentage >= 83)
             {
                 return "B";
             }
-            else if (Percentage < 83 && Percentage > 80)
+            else if (Percentage < 83 && Percentage >= 80)
             {
                 return "B-";
             }
-            else if (Percentage < 80 && Percentage > 77)
+            else if (Percentage < 80 && Percentage >= 77)
             {
                 return "C+";
             }
-            else if (Percentage < 77 && Percentage > 73)
+            else if (Percentage < 77 && Percentage >= 73)
             {
                 return "C";
             }
-            else if (Percentage < 73 && Percentage > 70)
+            else if (Percentage < 73 && Percentage >= 70)
             {
                 return "C-";
             }
-            else if (Percentage < 70 && Percentage > 67)
+            else if (Percentage < 70 && Percentage >= 67)
             {
                 return "D+";
             }
-            else if (Percentage < 67 && Percentage > 63)
+            else if (Percentage < 67 && Percentage >= 63)
             {
                 return "D";
             }
-            else if (Percentage < 63 && Percentage > 60)
+            else if (Percentage < 63 && Percentage >= 60)
             {
                 return "D-";
             }
