@@ -157,7 +157,7 @@ namespace LMS.Controllers
                     due = element4.DueDate,
                     score = 
                     from submission in this.db.Submitted
-                    where submission.AssignId == element4.AssignId
+                    where submission.AssignId == element4.AssignId && submission.UId == uNID
                     select submission.Score
                 };
 
