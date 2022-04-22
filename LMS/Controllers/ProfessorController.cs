@@ -352,7 +352,7 @@ namespace LMS.Controllers
                 this.db.SaveChanges();
                 this.UpdateAll_InClass(classID);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return Json(new { success = false });
             }
@@ -539,12 +539,22 @@ namespace LMS.Controllers
                             from Sub in this.db.Submitted
                             where Sub.AssignId == Assignment.AssignId && Sub.UId == uID
                             select Sub;
-                        Submitted Submission = x.ElementAt(0);
 
+                        //if there is a submission at 0
+                        if(x.Count() > 0)
+                        {
+                            //get the submission, use it's score
+                            Submitted Submission = x.ElementAt(0);
+                            AssignmentTotal += Assignment.MaxPoints;
+                            ScoreTotal += Submission.Score;
+                        }
 
-
-                        AssignmentTotal += Assignment.MaxPoints;
-                        ScoreTotal += Submission.Score;
+                        else
+                        {
+                            AssignmentTotal += Assignment.MaxPoints;
+                            ScoreTotal += 0;
+                        }
+                        
                     }
 
                     Double percent_unscaled = ScoreTotal / AssignmentTotal;
