@@ -334,6 +334,7 @@ namespace LMS.Controllers
                 select ac;
 
             UInt32 cattID = query.ElementAt(0).CattId;
+            UInt32 classID = query.ElementAt(0).ClassId;
 
             Assignments Assign = new Assignments
             {
@@ -341,8 +342,7 @@ namespace LMS.Controllers
                 CattId = cattID,
                 DueDate = asgdue,
                 MaxPoints = (UInt32)asgpoints,
-                Contents = asgcontents,
-
+                Contents = asgcontents
             };
 
             //Try and insert our class, if the class exists we return false
@@ -350,6 +350,7 @@ namespace LMS.Controllers
             {
                 this.db.Assignments.Add(Assign);
                 this.db.SaveChanges();
+                this.UpdateAll_InClass(classID);
             }
             catch (Exception)
             {
@@ -487,6 +488,20 @@ namespace LMS.Controllers
             }
 
             return Json(new { success = true });
+        }
+
+
+        public void UpdateAll_InClass(UInt32 cID)
+        {
+            IEnumerable<UInt32> StudentIDs =
+                from Enroll in this.db.Enrollments
+                where Enroll.ClassId == cID 
+                select Enroll.UId;
+
+            foreach (UInt32 uNID in StudentIDs)
+            {
+                UpdateGrade(uNID, cID);
+            }
         }
 
         public void UpdateGrade(UInt32 uID, UInt32 cID)
