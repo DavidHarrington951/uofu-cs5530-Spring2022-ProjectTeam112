@@ -9,7 +9,7 @@ namespace LMS.Models.LMSModels
         public uint UId { get; set; }
         public uint AssignId { get; set; }
         public string Sub { get; set; }
-        public uint? Score { get; set; }
+        public uint Score { get; set; }
         public DateTime? SubTime { get; set; }
 
         public virtual Assignments Assign { get; set; }

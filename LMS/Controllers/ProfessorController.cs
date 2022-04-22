@@ -412,7 +412,7 @@ namespace LMS.Controllers
                     lname = Student.Lname,
                     uid = UnidStringFormat(Student.UId),
                     time = element4.SubTime.HasValue ? element4.SubTime.Value.ToString() : "Not Submitted",
-                    score = 1//element4.Score.HasValue ? element4.Score : 0
+                    score = element4.Score
                 };
 
 
