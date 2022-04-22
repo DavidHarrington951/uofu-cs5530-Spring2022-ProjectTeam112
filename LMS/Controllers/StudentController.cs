@@ -383,56 +383,56 @@ namespace LMS.Controllers
 
             //foreach Grade in our list of grades, convert
             // it to the appropriate decimal value and add them together
-            Double Sum = 0.0;
+            Double Sum = 0.00;
             foreach (String Grade in GradeList)
             {
                 if (Grade.Equals("A"))
                 {
-                    Sum += 4.0;
+                    Sum += 4.00;
                 }
                 else if (Grade.Equals("A-"))
                 {
-                    Sum += 3.7;
+                    Sum += 3.70;
                 }
                 else if (Grade.Equals("B+"))
                 {
-                    Sum += 3.3;
+                    Sum += 3.30;
                 }
                 else if (Grade.Equals("B"))
                 {
-                    Sum += 3.0;
+                    Sum += 3.00;
                 }
                 else if (Grade.Equals("B-"))
                 {
-                    Sum += 2.7;
+                    Sum += 2.70;
                 }
                 else if (Grade.Equals("C+"))
                 {
-                    Sum += 2.3;
+                    Sum += 2.30;
                 }
                 else if (Grade.Equals("C"))
                 {
-                    Sum += 2.0;
+                    Sum += 2.00;
                 }
                 else if (Grade.Equals("C-"))
                 {
-                    Sum += 1.7;
+                    Sum += 1.70;
                 }
                 else if (Grade.Equals("D+"))
                 {
-                    Sum += 1.3;
+                    Sum += 1.30;
                 }
                 else if (Grade.Equals("D"))
                 {
-                    Sum += 1.0;
+                    Sum += 1.00;
                 }
                 else if (Grade.Equals("D-"))
                 {
-                    Sum += .7;
+                    Sum += .70;
                 }
                 else if (Grade.Equals("E"))
                 {
-                    Sum += 0.0;
+                    Sum += 0.00;
                 }
             }
 

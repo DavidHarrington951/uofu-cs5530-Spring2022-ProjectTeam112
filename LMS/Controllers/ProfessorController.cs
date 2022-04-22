@@ -512,7 +512,7 @@ namespace LMS.Controllers
                 select Category;
 
             Double total = 0;
-            UInt32 WeightTotal = 0;
+            Double WeightTotal = 0;
 
             foreach (AssignmentCategories Category in Categories)
             {
