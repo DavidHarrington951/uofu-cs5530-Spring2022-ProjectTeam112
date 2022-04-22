@@ -144,9 +144,7 @@ namespace LMS.Controllers
             foreach (Classes c in ClassesAtLocationSemester)
             {
                 //if end is between start and end
-
-                //or start is in between start and end
-                if((c.StartTime <= end && end <= c.EndTime) || (c.StartTime <= start && start <= c.EndTime))
+                if (c.StartTime.Value.TimeOfDay <= end.TimeOfDay && start.TimeOfDay <= c.EndTime.Value.TimeOfDay)
                 {
                     return Json(new { success = false });
                 }
