@@ -135,6 +135,18 @@ namespace LMS.Controllers
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
             UInt32 profID = UInt32.Parse(instructor.Substring(1));
 
+            // Check if times overlap
+            IEnumerable<Classes> ClassesAtLocationSemester =
+                from cl in this.db.Classes
+                where cl.Location == location && cl.Semester == Semester
+                select cl;
+
+            foreach (Classes c in ClassesAtLocationSemester)
+            {
+                if (c.StartTime <= end && start <= c.EndTime)
+                    return Json(new { success = false });
+            }
+
             Classes Class = new Classes
             {
                 CourseId = courseID,
