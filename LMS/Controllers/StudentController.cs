@@ -125,9 +125,43 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            //TODO: Implement
+            var x =
+                from course in this.db.Courses
+                where course.DprtAbv.Equals(subject) && course.CourseNum == num
+                join Class in this.db.Classes
+                on course.CourseId equals Class.CourseId
+                into Joined1
 
-            return Json("");
+                from element1 in Joined1
+                where element1.Semester.Equals(Semester)
+                join Enroll in this.db.Enrollments
+                on element1.ClassId equals Enroll.ClassId
+                into Joined2
+
+                from element2 in Joined2
+                where element2.UId == uNID
+                join AssignmentCategory in this.db.AssignmentCategories
+                on element2.ClassId equals AssignmentCategory.ClassId
+                into Joined3
+
+                from element3 in Joined3
+                join Assignment in this.db.Assignments
+                on element3.CattId equals Assignment.CattId
+                into Joined4
+
+                from element4 in Joined4
+                select new
+                {
+                    aname = element4.AssignName,
+                    cname = element3.CattName,
+                    due = element4.DueDate,
+                    score = 
+                    from submission in this.db.Submitted
+                    where submission.AssignId == element4.AssignId
+                    select submission.Score
+                };
+
+            return Json(x.ToArray());
         }
 
 
