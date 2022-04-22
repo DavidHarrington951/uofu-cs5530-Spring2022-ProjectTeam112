@@ -1,14 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Text;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using LMS.Models.LMSModels;
-using System.Text;
 
 namespace LMS.Controllers
 {
+    /*
+     * Author: Daniel Kopta 
+     */
+    /*
+     * Modified By: Ethan Quinlan and David Harrington
+     */
+    /// <summary>
+    /// Handles Administrative Tasks, Inherits from Controller
+    /// </summary>
     [Authorize(Roles = "Administrator")]
     public class AdministratorController : CommonController
     {

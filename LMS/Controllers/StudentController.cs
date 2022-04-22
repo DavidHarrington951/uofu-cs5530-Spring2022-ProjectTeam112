@@ -1,17 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using LMS.Models.LMSModels;
 
 namespace LMS.Controllers
 {
-    //Author: Prof Daniel Kopta
-    // Modified by: David Harrington and Ethan Quinlan
+    /*
+     * Author: Prof Daniel Kopta
+     */
+    /*
+     * Modified by: David Harrington and Ethan Quinlan
+     */
+    /// <summary>
+    /// Handles Student Tasks, Inherits from Controller.
+    /// </summary>
     [Authorize(Roles = "Student")]
     public class StudentController : CommonController
     {
@@ -164,8 +170,6 @@ namespace LMS.Controllers
             return Json(query.ToArray());
         }
 
-
-
         /// <summary>
         /// Adds a submission to the given assignment for the given student
         /// The submission should use the current time as its DateTime
@@ -215,7 +219,6 @@ namespace LMS.Controllers
 
                 //select the assignmentID
                 select Assignment.AssignId;
-
 
             IEnumerable<Submitted> Submissions =
                 from a in AssignmentIDs
@@ -276,7 +279,6 @@ namespace LMS.Controllers
             }
         }
 
-
         /// <summary>
         /// Enrolls a student in a class.
         /// </summary>
@@ -333,8 +335,6 @@ namespace LMS.Controllers
             // else return true, operation successful
             return Json(new { success = true });
         }
-
-
 
         /// <summary>
         /// Calculates a student's GPA

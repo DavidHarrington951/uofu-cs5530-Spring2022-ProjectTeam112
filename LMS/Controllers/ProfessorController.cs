@@ -1,18 +1,24 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LMS.Controllers
 {
-    //Author: Prof Daniel Kopta
-    // Modified by: David Harrington and Ethan Quinlan
+    /*
+     * Author: Prof Daniel Kopta
+     */
+    /*
+     * Modified by: David Harrington and Ethan Quinlan
+     */
+    /// <summary>
+    /// Handles Professor Tasks, inherits from Controller
+    /// </summary>
     [Authorize(Roles = "Professor")]
     public class ProfessorController : CommonController
     {
@@ -94,21 +100,21 @@ namespace LMS.Controllers
 
         /*******Begin code to modify********/
 
-        /// <summary>
-        /// Returns a JSON array of all the students in a class.
-        /// Each object in the array should have the following fields:
-        /// "fname" - first name
-        /// "lname" - last name
-        /// "uid" - user ID
-        /// "dob" - date of birth
-        /// "grade" - the student's grade in this class
-        /// </summary>
-        /// <param name="subject">The course subject abbreviation</param>
-        /// <param name="num">The course number</param>
-        /// <param name="season">The season part of the semester for the class the assignment belongs to</param>
-        /// <param name="year">The year part of the semester for the class the assignment belongs to</param>
-        /// <returns>The JSON array</returns>
-        public IActionResult GetStudentsInClass(string subject, int num, string season, int year)
+    /// <summary>
+    /// Returns a JSON array of all the students in a class.
+    /// Each object in the array should have the following fields:
+    /// "fname" - first name
+    /// "lname" - last name
+    /// "uid" - user ID
+    /// "dob" - date of birth
+    /// "grade" - the student's grade in this class
+    /// </summary>
+    /// <param name="subject">The course subject abbreviation</param>
+    /// <param name="num">The course number</param>
+    /// <param name="season">The season part of the semester for the class the assignment belongs to</param>
+    /// <param name="year">The year part of the semester for the class the assignment belongs to</param>
+    /// <returns>The JSON array</returns>
+    public IActionResult GetStudentsInClass(string subject, int num, string season, int year)
         {
             var ClassID =
                 from co in this.db.Courses

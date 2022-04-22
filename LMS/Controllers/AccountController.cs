@@ -19,6 +19,15 @@ using System.Text;
 
 namespace LMS.Controllers
 {
+    /*
+     * Author: Daniel Kopta
+     */
+    /*
+     * Modified By: Ethan Quinlan and David Harrington
+     */
+    /// <summary>
+    /// Handles Account, Authorization, Verification, and Email tasks
+    /// </summary>
     [Authorize]
     [Route("[controller]/[action]")]
     public class AccountController : CommonController
@@ -39,7 +48,6 @@ namespace LMS.Controllers
             //this._emailSender = emailSender;
             this._logger = logger;
         }
-
 
         [TempData]
         public string ErrorMessage { get; set; }
@@ -573,11 +581,7 @@ namespace LMS.Controllers
 
         /*******End code to modify********/
 
-
-
-
         #region Helpers
-
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
@@ -597,7 +601,6 @@ namespace LMS.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
-
         #endregion
     }
 }

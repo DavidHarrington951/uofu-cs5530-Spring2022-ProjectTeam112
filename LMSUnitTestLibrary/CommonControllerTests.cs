@@ -1,19 +1,17 @@
 using Xunit;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using LMS.Controllers;
-using LMS.Models.LMSModels;
+using System.Collections;
+using Microsoft.AspNetCore.Mvc;
 using static LMSUnitTestLibrary.DatabaseBuilder;
 
 namespace LMSUnitTestLibrary
 {
     /*
      * Authors: David Harrington and Ethan Quinlan
+     */
+    /*
+     * We wanted to write tests for the other controller, but ran out of time 
      */
     /// <summary>
     /// Testing Suite for CommonController Class. Contains tests for Type Checking and Value Checking

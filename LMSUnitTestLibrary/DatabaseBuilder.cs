@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
 using LMS.Controllers;
 using LMS.Models.LMSModels;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace LMSUnitTestLibrary
 {
-    class DatabaseBuilder
+    /*
+     * Authors: David Harrington and Ethan Quinlan
+     */
+    /// <summary>
+    /// Builds Test Database Contexts for testing
+    /// </summary>
+    public class DatabaseBuilder
     {
         /// <summary>
         /// Creates a new Empty Default Service Provider

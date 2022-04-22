@@ -1,20 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using LMS.Models.LMSModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 [assembly: InternalsVisibleTo("LMSUnitTestLibrary")]
-
 namespace LMS.Controllers
 {
-    //Author: Prof Daniel Kopta
-    // Modified by: David Harrington and Ethan Quinlan
+    /*
+     * Author: Prof Daniel Kopta
+     */
+    /*
+     * Modified by: David Harrington and Ethan Quinlan
+     */
     /// <summary>
     /// Inherits from Controller, a base Controller class for all other Controllers to Inherit from. 
     /// Contains basic Query Functionality. 
