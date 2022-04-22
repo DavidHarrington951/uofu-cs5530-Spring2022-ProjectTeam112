@@ -463,11 +463,13 @@ namespace LMS.Controllers
                     cID = element1.ClassId
                 };
 
+            UInt32 cID = 0;
+            foreach(var sub in Submissions)
+            {
+                cID = sub.cID;
+                sub.sub.Score = (UInt32)score;
+            }
 
-
-            Submissions.ElementAt(0).sub.Score = (UInt32)score;
-
-            UInt32 cID = Submissions.ElementAt(0).cID;
 
             //Try submitting changes to the database
             try
@@ -479,7 +481,7 @@ namespace LMS.Controllers
             }
 
             //if the changes fail, return false
-            catch (Exception)
+            catch (Exception e)
             {
                 return Json(new { success = false });
             }
@@ -518,7 +520,13 @@ namespace LMS.Controllers
 
                     foreach (Assignments Assignment in Assignments)
                     {
-                        Submitted Submission = this.db.Submitted.Find(uID, Assignment.AssignId);
+                        IEnumerable<Submitted> x =
+                            from Sub in this.db.Submitted
+                            where Sub.AssignId == Assignment.AssignId && Sub.UId == uID
+                            select Sub;
+                        Submitted Submission = x.ElementAt(0);
+
+
 
                         AssignmentTotal += Assignment.MaxPoints;
                         ScoreTotal += Submission.Score;
