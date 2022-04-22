@@ -488,29 +488,47 @@ namespace LMS.Controllers
         {
             UInt32 uNID = this.BuildUnid();
             String uNIDStr = this.UnidStringFormat(uNID);
+
+            //we generate based on role, 
+            // add too the correct table
             if (role.Equals("Administrator"))
             {
+                //create the new user
                 Administrators A = new Administrators 
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName };
+
+                //add it to the correct table
                 this.db.Administrators.Add(A);
+
+                //save changes and return
                 this.db.SaveChanges();
                 return uNIDStr;
             }
 
             else if (role.Equals("Professor"))
             {
+                //create the new user
                 Professors Plum = new Professors 
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
+                
+                //add it to the correct table
                 this.db.Professors.Add(Plum);
+
+                //save changes and return
                 this.db.SaveChanges();
                 return uNIDStr;
             }
 
             else 
             {
+                //create new user
                 Students S = new Students
                 { UId = uNID, Dob = DOB, Lname = lName, FName = fName, DprtAbv = SubjectAbbrev };
+
+                //add it to the correct table
                 this.db.Students.Add(S);
+
+                //save changes and return
                 this.db.SaveChanges();
                 return uNIDStr;
             }     
@@ -523,6 +541,7 @@ namespace LMS.Controllers
         /// <returns></returns>
         internal UInt32 BuildUnid()
         {
+            //Get the uNIDs for each user table
             IEnumerable<UInt32> AdminUNids =
                 from A in this.db.Administrators
                 select A.UId;
@@ -535,14 +554,17 @@ namespace LMS.Controllers
                 from S in this.db.Students
                 select S.UId;
 
+            //union the query, turn it into a list, and sort it
             List<UInt32> UNids = AdminUNids.Union(ProfUNids).Union(StudentUNids).ToList();
             UNids.Sort();
 
+            //base case, if there are no users in the system, return one
             if(UNids.Count == 0)
             {
                 return 1;
             }
 
+            //get the highest uNID on the list, increment it and return
             else
             {
                 return UNids[UNids.Count - 1] + 1;

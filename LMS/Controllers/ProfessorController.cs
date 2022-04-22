@@ -152,9 +152,11 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInCategory(string subject, int num, string season, int year, string category)
         {
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+
             if (category == null)
             {
-                String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+
                 IEnumerable<Object> x
                     = from course in this.db.Courses
                       where course.DprtAbv.Equals(subject) && course.CourseNum == num
@@ -189,7 +191,6 @@ namespace LMS.Controllers
             }
             else
             {
-                String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
                 IEnumerable<Object> x
                     = from course in this.db.Courses
                       where course.DprtAbv.Equals(subject) && course.CourseNum == num
@@ -225,7 +226,6 @@ namespace LMS.Controllers
             }
         }
 
-
         /// <summary>
         /// Returns a JSON array of the assignment categories for a certain class.
         /// Each object in the array should have the folling fields:
@@ -240,16 +240,24 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentCategories(string subject, int num, string season, int year)
         {
-            var query =
-                from co in this.db.Courses
-                join cl in this.db.Classes
-                on co.CourseId equals cl.CourseId
-                where co.DprtAbv == subject && co.CourseNum == num
-                join ac in this.db.AssignmentCategories
-                on cl.ClassId equals ac.ClassId
-                where Regex.Split(cl.Semester, " ")[0] == season
-                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
-                select new { name = ac.CattName, weight = ac.GradeWeight };
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
+
+            //Get each Category that fits the Filter
+            IEnumerable<Object> query =
+
+                //get course 
+                from Course in this.db.Courses
+                where Course.DprtAbv == subject && Course.CourseNum == num
+
+                //join with Classes on Course ID
+                join Class in this.db.Classes
+                on Course.CourseId equals Class.CourseId
+
+                //join with Assignment Categories on Class ID
+                join Category in this.db.AssignmentCategories
+                on Class.ClassId equals Category.ClassId
+                where Class.Semester.Equals(Semester)
+                select new { name = Category.CattName, weight = Category.GradeWeight };
 
             return Json(query.ToArray());
         }
@@ -267,38 +275,43 @@ namespace LMS.Controllers
         ///	false if an assignment category with the same name already exists in the same class.</returns>
         public IActionResult CreateAssignmentCategory(string subject, int num, string season, int year, string category, int catweight)
         {
-            IEnumerable<Courses> Courses =
-                from c in this.db.Courses
-                where c.DprtAbv.Equals(subject) && c.CourseNum == (UInt32)num
-                select c;
-
-            UInt32 courseID = Courses.ElementAt(0).CourseId;
+            // Perform Parameter Variable Conversion
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
             IEnumerable<Classes> Classes =
-                from cl in this.db.Classes
-                where cl.CourseId == courseID
-                && Regex.Split(cl.Semester, " ")[0] == season
-                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
-                select cl;
+                //Select the Course where Subject and CourseNum matches
+                from Course in this.db.Courses
+                where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
 
+                //join with Classes on CourseID
+                join Class in this.db.Classes
+                on Course.CourseId equals Class.CourseId
+                where Class.Semester.Equals(Semester)
+
+                //Select the Class where the Semester Matches
+                select Class;
+
+            //Get the classID
             UInt32 classID = Classes.ElementAt(0).ClassId;
 
-            AssignmentCategories ac = new AssignmentCategories
+            //Create our new Category for Insertion
+            AssignmentCategories Category = new AssignmentCategories
             {
                 CattName = category,
                 ClassId = classID,
                 GradeWeight = (UInt32)catweight
-
             };
 
-            //Try and insert our class, if the class exists we return false
             try
             {
-                this.db.AssignmentCategories.Add(ac);
+                //Try and insert the Category into the database
+                this.db.AssignmentCategories.Add(Category);
                 this.db.SaveChanges();
             }
             catch (Exception)
             {
+                //Return False if the Category Exists...
+                //or some other problem occurs
                 return Json(new { success = false });
             }
 
@@ -321,21 +334,34 @@ namespace LMS.Controllers
         /// false if an assignment with the same name already exists in the same assignment category.</returns>
         public IActionResult CreateAssignment(string subject, int num, string season, int year, string category, string asgname, int asgpoints, DateTime asgdue, string asgcontents)
         {
-            IEnumerable<AssignmentCategories> query =
-                from co in this.db.Courses
-                join cl in this.db.Classes
-                on co.CourseId equals cl.CourseId
-                where co.DprtAbv == subject && co.CourseNum == num
-                join ac in this.db.AssignmentCategories
-                on cl.ClassId equals ac.ClassId
-                where Regex.Split(cl.Semester, " ")[0] == season
-                && UInt32.Parse(Regex.Split(cl.Semester, " ")[1]) == year
-                && ac.CattName == category
-                select ac;
+            // Perform Parameter Variable Conversion
+            String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            UInt32 cattID = query.ElementAt(0).CattId;
-            UInt32 classID = query.ElementAt(0).ClassId;
+            //Get the Assignment Category that matches Parameters
+            IEnumerable<AssignmentCategories> AssignmentCategory =
 
+                //get courses where the CourseNum and subject are Equivelent
+                from Course in this.db.Courses
+                where Course.DprtAbv == subject && Course.CourseNum == num
+
+                //join with Classes on CourseID
+                join Class in this.db.Classes
+                on Course.CourseId equals Class.CourseId
+
+                //Get Courses where the Semester and Category Name is Equivelent
+                join Category in this.db.AssignmentCategories
+                on Class.ClassId equals Category.ClassId
+                where Class.Semester.Equals(Semester)
+                && Category.CattName == category
+
+                //select the category
+                select Category;
+
+            //select the data from the database
+            UInt32 cattID = AssignmentCategory.ElementAt(0).CattId;
+            UInt32 classID = AssignmentCategory.ElementAt(0).ClassId;
+
+            //Create the new Assignment
             Assignments Assign = new Assignments
             {
                 AssignName = asgname,
@@ -345,15 +371,20 @@ namespace LMS.Controllers
                 Contents = asgcontents
             };
 
-            //Try and insert our class, if the class exists we return false
             try
             {
+                //Try and insert our Assignment in the database
                 this.db.Assignments.Add(Assign);
                 this.db.SaveChanges();
+
+                //Try and update the grade for every student enrolled in the class
                 this.UpdateAll_InClass(classID);
             }
-            catch (Exception e)
+
+            catch (Exception)
             {
+                //if the assignment already exists, or...
+                //there was an error updating student grades, we return false
                 return Json(new { success = false });
             }
 
@@ -383,31 +414,41 @@ namespace LMS.Controllers
             //Perform Parameter Variable Conversion
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
+            //Get each submission that fits the Filter
             IEnumerable<Object> Submissions =
+                //get courses where the CourseNum and subject are equivelent
                 from Course in this.db.Courses
                 where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
+
+                //join with classes on Course ID and Semester
                 join Class in this.db.Classes
                 on new { ID = Course.CourseId, F = Semester } equals new { ID = Class.CourseId, F = Class.Semester }
                 into Joined1
 
+                //join with AssignmentCategories on Class Id and Category Name
                 from element1 in Joined1
                 join Category in this.db.AssignmentCategories
                 on new { ID = element1.ClassId, F = category } equals new { ID = Category.ClassId, F = Category.CattName }
                 into Joined2
 
+                //join with Assignments on Category ID and Assignment Name
                 from element2 in Joined2
                 join Assignment in this.db.Assignments
                 on new { ID = element2.CattId, F = asgname } equals new { ID = Assignment.CattId, F = Assignment.AssignName }
                 into Joined3
 
+                //join with Submissions on Assignment ID 
                 from element3 in Joined3
                 join Submission in this.db.Submitted
                 on element3.AssignId equals Submission.AssignId
                 into Joined4
 
+                //from these rows
                 from element4 in Joined4
                 join Student in this.db.Students
                 on element4.UId equals Student.UId
+
+                //select FirstName, LastName, uNID, Submission Time, and Submission Score
                 select new
                 {
                     fname = Student.FName,
@@ -417,6 +458,7 @@ namespace LMS.Controllers
                     score = element4.Score
                 };
 
+            //Return as JsonResult Array
             return Json(Submissions.ToArray());
         }
 
@@ -438,23 +480,30 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            var Submissions =
+            //Get Submission that fits the Filter
+            IEnumerable Submissions =
+                //get courses where the CourseNum and subject are equivelent
                 from Course in this.db.Courses
                 where Course.DprtAbv.Equals(subject) && Course.CourseNum == (UInt32)num
+
+                //join with Classes on Course ID and Semester
                 join Class in this.db.Classes
                 on new { ID = Course.CourseId, F = Semester } equals new { ID = Class.CourseId, F = Class.Semester }
                 into Joined1
 
+                //join with Assignment Categories on Class ID and Category Name
                 from element1 in Joined1
                 join Category in this.db.AssignmentCategories
                 on new { ID = element1.ClassId, F = category } equals new { ID = Category.ClassId, F = Category.CattName }
                 into Joined2
 
+                //join with Assignments on Category ID and Assignment Name
                 from element2 in Joined2
                 join Assignment in this.db.Assignments
                 on new { ID = element2.CattId, F = asgname } equals new { ID = Assignment.CattId, F = Assignment.AssignName }
                 into Joined3
 
+                //join with Submitted on AssignID and uNID
                 from element3 in Joined3
                 join Sub in this.db.Submitted
                 on new { ID = element3.AssignId, F = uNID } equals new { ID = Sub.AssignId, F = Sub.UId }
@@ -464,48 +513,62 @@ namespace LMS.Controllers
                     cID = element1.ClassId
                 };
 
+            //due to the need for anonymous typing, we use a foreach loop to cast the inner element to
+            //set the score for the submission in that category and get the CID out, that way we don't need to run a second query
             UInt32 cID = 0;
-            foreach(var sub in Submissions)
+            foreach (dynamic sub in Submissions)
             {
                 cID = sub.cID;
                 sub.sub.Score = (UInt32)score;
             }
 
-
             //Try submitting changes to the database
             try
             {
+                //try and save the submission
                 this.db.SaveChanges();
-
-                //update the grade in the class
+                //try and update the grade in the class
                 UpdateGrade(uNID, cID);
             }
 
-            //if the changes fail, return false
-            catch (Exception e)
+            catch (Exception)
             {
+                //if the submission changes fail...
+                //or if we fail to update the student's grade
                 return Json(new { success = false });
             }
 
             return Json(new { success = true });
         }
 
-
+        /// <summary>
+        /// Updates the letter grade of each student in the provided class.
+        /// </summary>
+        /// <param name="cID">The class who's student's grades we need to update</param>
         public void UpdateAll_InClass(UInt32 cID)
         {
+            //get a list of each student enrolled in the class
             IEnumerable<UInt32> StudentIDs =
                 from Enroll in this.db.Enrollments
-                where Enroll.ClassId == cID 
+                where Enroll.ClassId == cID
                 select Enroll.UId;
 
+            //foreach student enrolled in the class
             foreach (UInt32 uNID in StudentIDs)
             {
+                //update the grade for that student
                 UpdateGrade(uNID, cID);
             }
         }
 
+        /// <summary>
+        /// Updates the class grade of the provided student.
+        /// </summary>
+        /// <param name="uID">The uNID of the student who's grade we are updating</param>
+        /// <param name="cID">The cID of the class grade</param>
         public void UpdateGrade(UInt32 uID, UInt32 cID)
         {
+            //get each category for the class
             IEnumerable<AssignmentCategories> Categories =
                 from Category in this.db.AssignmentCategories
                 where Category.ClassId == cID
@@ -518,11 +581,13 @@ namespace LMS.Controllers
             {
                 UInt32 id = Category.CattId;
 
+                //get each assignment row in the category
                 IEnumerable<Assignments> Assignments =
                     from Assignment in this.db.Assignments
                     where Assignment.CattId == id
                     select Assignment;
 
+                //if the Category has assignments in it, we proceed to grade it.
                 if (Assignments.Count() > 0)
                 {
                     UInt32 weight = Category.GradeWeight;
@@ -530,25 +595,25 @@ namespace LMS.Controllers
                     WeightTotal += weight;
 
                     Double ScoreTotal = 0;
-                    // divide by
                     Double AssignmentTotal = 0;
 
                     foreach (Assignments Assignment in Assignments)
                     {
+                        // get the assignment submission for this student
                         IEnumerable<Submitted> x =
                             from Sub in this.db.Submitted
                             where Sub.AssignId == Assignment.AssignId && Sub.UId == uID
                             select Sub;
 
-                        //if there is a submission at 0
-                        if(x.Count() > 0)
+                        //if the query returned a submission
+                        if (x.Count() > 0)
                         {
-                            //get the submission, use it's score
                             Submitted Submission = x.ElementAt(0);
                             AssignmentTotal += Assignment.MaxPoints;
                             ScoreTotal += Submission.Score;
                         }
 
+                        //if the query did not return a submission
                         else
                         {
                             AssignmentTotal += Assignment.MaxPoints;
@@ -568,20 +633,26 @@ namespace LMS.Controllers
 
             Double Grade = factor * total;
 
-            //convert Grade to Letter
+            //convert our grade percentage to a letter
             String Letter = this.toLetterGrade(Grade);
 
-            //step n
+            //Get the appropriate enrollment row and update it
             IEnumerable<Enrollments> Enrollment =
                 from Enroll in this.db.Enrollments
                 where Enroll.ClassId == cID && Enroll.UId == uID
                 select Enroll;
-
             Enrollment.ElementAt(0).Grade = Letter;
 
+            //save the changes to the DB, exceptions will be caught elsewhere. 
             this.db.SaveChanges();
         }
 
+        /// <summary>
+        /// Converts a percentage to a letter grade according to
+        /// the Grading Scale for the Syllabus of CS5530 2022
+        /// </summary>
+        /// <param name="Percentage"></param>
+        /// <returns></returns>
         public String toLetterGrade(Double Percentage)
         {
             if (Percentage >= 93)
@@ -632,10 +703,7 @@ namespace LMS.Controllers
             {
                 return "E";
             }
-
         }
-
-
 
         /// <summary>
         /// Returns a JSON array of the classes taught by the specified professor

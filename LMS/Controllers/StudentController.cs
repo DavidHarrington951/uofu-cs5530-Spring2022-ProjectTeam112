@@ -293,6 +293,7 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
+            //
             IEnumerable<UInt32> Classes =
                 //get the Course that matches the filter
                 from Course in this.db.Courses
