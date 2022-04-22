@@ -469,12 +469,13 @@ namespace LMS.Controllers
 
             UInt32 cID = Submissions.ElementAt(0).cID;
 
-            //update the grade in the class
-
             //Try submitting changes to the database
             try
             {
                 this.db.SaveChanges();
+
+                //update the grade in the class
+                UpdateGrade(uNID, cID);
             }
 
             //if the changes fail, return false
@@ -488,8 +489,6 @@ namespace LMS.Controllers
 
         public void UpdateGrade(UInt32 uID, UInt32 cID)
         {
-
-
             IEnumerable<AssignmentCategories> Categories =
                 from Category in this.db.AssignmentCategories
                 where Category.ClassId == cID
