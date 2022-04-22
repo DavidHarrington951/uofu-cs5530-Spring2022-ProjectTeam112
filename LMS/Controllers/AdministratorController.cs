@@ -143,8 +143,13 @@ namespace LMS.Controllers
 
             foreach (Classes c in ClassesAtLocationSemester)
             {
-                if (c.StartTime <= end && start <= c.EndTime)
+                //if end is between start and end
+
+                //or start is in between start and end
+                if((c.StartTime <= end && end <= c.EndTime) || (c.StartTime <= start && start <= c.EndTime))
+                {
                     return Json(new { success = false });
+                }
             }
 
             Classes Class = new Classes

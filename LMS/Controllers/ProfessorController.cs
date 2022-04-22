@@ -554,7 +554,6 @@ namespace LMS.Controllers
                             AssignmentTotal += Assignment.MaxPoints;
                             ScoreTotal += 0;
                         }
-                        
                     }
 
                     Double percent_unscaled = ScoreTotal / AssignmentTotal;
