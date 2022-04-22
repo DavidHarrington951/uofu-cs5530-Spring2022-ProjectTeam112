@@ -216,34 +216,64 @@ namespace LMS.Controllers
                 //select the assignmentID
                 select Assignment.AssignId;
 
+
+            IEnumerable<Submitted> Submissions =
+                from a in AssignmentIDs
+                join Sub in this.db.Submitted
+                on a equals Sub.AssignId
+                select Sub;
+
             // The IEnumerable should only have a single element inside it, that element is our AssignID
             UInt32 AssignID = AssignmentIDs.ElementAt(0);
 
-            // Construct our Assignment Submission
-            Submitted Submission = new Submitted
+            if (Submissions.Count() > 0)
             {
-                UId = uNID,
-                AssignId = AssignID,
-                Sub = contents,
-                Score = 0,
-                SubTime = System.DateTime.Now
-            };
+                Submissions.ElementAt(0).Sub = contents;
+                Submissions.ElementAt(0).SubTime = System.DateTime.Now;
 
-            // Try and add this submission to the Database
-            try
-            {
-                this.db.Submitted.Add(Submission);
-                this.db.SaveChanges();
+                // Try and add this submission to the Database
+                try
+                {
+                    this.db.SaveChanges();
+                }
+
+                // if the assignment already exists, return false, for the assignment has already been added 
+                catch
+                {
+                    return Json(new { success = false });
+                }
+
+                // else return true, the operation was a success
+                return Json(new { success = true });
             }
-
-            // if the assignment already exists, return false, for the assignment has already been added 
-            catch
+            else
             {
-                return Json(new { success = false });
-            }
+                // Construct our Assignment Submission
+                Submitted Submission = new Submitted
+                {
+                    UId = uNID,
+                    AssignId = AssignID,
+                    Sub = contents,
+                    Score = 0,
+                    SubTime = System.DateTime.Now
+                };
 
-            // else return true, the operation was a success
-            return Json(new { success = true });
+                // Try and add this submission to the Database
+                try
+                {
+                    this.db.Submitted.Add(Submission);
+                    this.db.SaveChanges();
+                }
+
+                // if the assignment already exists, return false, for the assignment has already been added 
+                catch
+                {
+                    return Json(new { success = false });
+                }
+
+                // else return true, the operation was a success
+                return Json(new { success = true });
+            }
         }
 
 
