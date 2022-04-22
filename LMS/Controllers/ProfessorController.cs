@@ -152,7 +152,7 @@ namespace LMS.Controllers
         /// <returns>The JSON array</returns>
         public IActionResult GetAssignmentsInCategory(string subject, int num, string season, int year, string category)
         {
-            if(category == null)
+            if (category == null)
             {
                 String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
                 IEnumerable<Object> x
@@ -463,7 +463,7 @@ namespace LMS.Controllers
                     cID = element1.ClassId
                 };
 
-            
+
 
             Submissions.ElementAt(0).sub.Score = (UInt32)score;
 
@@ -498,7 +498,7 @@ namespace LMS.Controllers
             Double total = 0;
             UInt32 WeightTotal = 0;
 
-            foreach(AssignmentCategories Category in Categories)
+            foreach (AssignmentCategories Category in Categories)
             {
                 UInt32 id = Category.CattId;
 
@@ -507,7 +507,7 @@ namespace LMS.Controllers
                     where Assignment.CattId == id
                     select Assignment;
 
-                if(Assignments.Count() > 0)
+                if (Assignments.Count() > 0)
                 {
                     UInt32 weight = Category.GradeWeight;
 
@@ -525,9 +525,9 @@ namespace LMS.Controllers
                         ScoreTotal += Submission.Score;
                     }
 
-                    Double percentage = ScoreTotal / AssignmentTotal;
+                    Double percent_unscaled = ScoreTotal / AssignmentTotal;
 
-                    Double Scale = percentage * WeightTotal;
+                    Double Scale = percent_unscaled * weight;
 
                     total += Scale;
                 }
@@ -535,16 +535,73 @@ namespace LMS.Controllers
 
             Double factor = 100 / WeightTotal;
 
+            Double Grade = factor * total;
 
-
+            //convert Grade to Letter
+            String Letter = this.toLetterGrade(Grade);
 
             //step n
-            IEnumerable < Enrollments > Enrollment =
+            IEnumerable<Enrollments> Enrollment =
                 from Enroll in this.db.Enrollments
                 where Enroll.ClassId == cID && Enroll.UId == uID
                 select Enroll;
 
-            
+            Enrollment.ElementAt(0).Grade = Letter;
+
+            this.db.SaveChanges();
+        }
+
+        public String toLetterGrade(Double Percentage)
+        {
+            if (Percentage >= 93)
+            {
+                return "A";
+            }
+            else if (Percentage < 93 && Percentage > 90)
+            {
+                return "A-";
+            }
+            else if (Percentage < 90 && Percentage > 87)
+            {
+                return "B+";
+            }
+            else if (Percentage < 87 && Percentage > 83)
+            {
+                return "B";
+            }
+            else if (Percentage < 83 && Percentage > 80)
+            {
+                return "B-";
+            }
+            else if (Percentage < 80 && Percentage > 77)
+            {
+                return "C+";
+            }
+            else if (Percentage < 77 && Percentage > 73)
+            {
+                return "C";
+            }
+            else if (Percentage < 73 && Percentage > 70)
+            {
+                return "C-";
+            }
+            else if (Percentage < 70 && Percentage > 67)
+            {
+                return "D+";
+            }
+            else if (Percentage < 67 && Percentage > 63)
+            {
+                return "D";
+            }
+            else if (Percentage < 63 && Percentage > 60)
+            {
+                return "D-";
+            }
+            else
+            {
+                return "E";
+            }
+
         }
 
 
