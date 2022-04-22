@@ -125,7 +125,7 @@ namespace LMS.Controllers
             UInt32 uNID = UInt32.Parse(uid.Substring(1));
             String Semester = new StringBuilder(season).Append(" ").Append(year).ToString();
 
-            var x =
+            IEnumerable<Object> query =
                 from course in this.db.Courses
                 where course.DprtAbv.Equals(subject) && course.CourseNum == num
                 join Class in this.db.Classes
@@ -161,7 +161,7 @@ namespace LMS.Controllers
                     select submission.Score
                 };
 
-            return Json(x.ToArray());
+            return Json(query.ToArray());
         }
 
 

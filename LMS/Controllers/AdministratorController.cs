@@ -82,6 +82,7 @@ namespace LMS.Controllers
         /// false if the Course already exists.</returns>
         public IActionResult CreateCourse(string subject, int number, string name)
         {
+            //create the course
             Courses C = new Courses
             {
                 DprtAbv = subject,
@@ -89,14 +90,17 @@ namespace LMS.Controllers
                 CourseName = name
             };
 
+            //add it to the database
             this.db.Courses.Add(C);
 
             try
             {
+                //try and save changes
                 this.db.SaveChanges();
             }
             catch (Exception)
             {
+                //return false if the course already exists
                 return Json(new { success = false });
             }
 

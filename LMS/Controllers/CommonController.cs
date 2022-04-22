@@ -336,9 +336,13 @@ namespace LMS.Controllers
         /// <returns></returns>
         internal String UnidStringFormat(UInt32 uNID)
         {
+            //build our string, start with u
             StringBuilder format = new StringBuilder("u");
 
+            //convert the number to string
             String numString = uNID.ToString();
+
+            //add the non-zero digits
             int numZero = 7 - numString.Length;
             for (int i = 0; i < numZero; i++)
             {
